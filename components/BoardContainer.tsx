@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Board } from "@/types";
+import { Board, Task } from "@/types";
 import { storageUtil } from "@/utils/storage";
 import BoardList from "./BoardList";
 import CreateBoardForm from "./CreateBoardForm";
@@ -104,6 +104,21 @@ export default function BoardContainer() {
         storageUtil.saveBoards(updatedBoards);
     };
 
+    const handleTaskReorder = (boardId: string, tasks: Task[]) => {
+        const updatedBoards = boards.map((board) => {
+            if (board.id === boardId) {
+                return {
+                    ...board,
+                    tasks: tasks
+                };
+            }
+            return board;
+        });
+
+        setBoards(updatedBoards);
+        storageUtil.saveBoards(updatedBoards);
+    };
+
     return (
         <div className="p-6">
             <CreateBoardForm onSubmit={handleCreateBoard} />
@@ -115,7 +130,8 @@ export default function BoardContainer() {
                     onReorder: handleReorderBoards,
                     onTaskAdd: handleTaskAdd,
                     onTaskEdit: handleTaskEdit,
-                    onTaskDelete: handleTaskDelete
+                    onTaskDelete: handleTaskDelete,
+                    onTaskReorder: handleTaskReorder
                 }}
             />
         </div>

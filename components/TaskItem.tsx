@@ -1,5 +1,7 @@
 import { useState } from "react";
 import { Task } from "@/types";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
 type Props = {
     task: Task;
@@ -9,6 +11,17 @@ type Props = {
 };
 
 export default function TaskItem({ task, boardId, onEdit, onDelete }: Props) {
+    const { attributes, listeners, setNodeRef, transform, transition } =
+        useSortable({
+            id: task.id
+        });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        zIndex: transform ? 999 : "auto"
+    };
+
     const [isEditing, setIsEditing] = useState(false);
     const [editTitle, setEditTitle] = useState(task.title);
 
@@ -24,7 +37,8 @@ export default function TaskItem({ task, boardId, onEdit, onDelete }: Props) {
         setIsEditing(false);
     };
 
-    const handleDelete = () => {
+    const handleDelete = (e: React.MouseEvent) => {
+        e.stopPropagation(); // 드래그 이벤트와 충돌 방지
         if (window.confirm("이 할 일을 삭제하시겠습니까?")) {
             onDelete(boardId, task.id);
         }
@@ -63,11 +77,23 @@ export default function TaskItem({ task, boardId, onEdit, onDelete }: Props) {
     }
 
     return (
-        <li className="group px-3 py-2 bg-white rounded-lg border border-gray-200 flex justify-between items-center hover:shadow-sm transition-shadow">
-            <span className="text-sm text-gray-700">{task.title}</span>
+        <li
+            ref={setNodeRef}
+            style={style}
+            className="group px-3 py-2 bg-white rounded-lg border border-gray-200 flex justify-between items-center hover:shadow-sm transition-shadow"
+        >
+            {/* 드래그 핸들러를 텍스트 또는 특정 영역에만 적용 */}
+            <div {...attributes} {...listeners} className="cursor-grab flex-1">
+                <span className="text-sm text-gray-700">{task.title}</span>
+            </div>
+
+            {/* 수정/삭제 버튼 */}
             <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <button
-                    onClick={() => setIsEditing(true)}
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        setIsEditing(true);
+                    }}
                     className="text-xs text-gray-500 hover:text-blue-500 px-2 py-1"
                 >
                     수정
