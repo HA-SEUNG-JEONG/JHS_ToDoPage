@@ -40,7 +40,7 @@ export default function SortableBoardItem({ board, boardActions }: Props) {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!editTitle.trim()) return;
-        boardActions.onEdit(board.id, editTitle);
+        boardActions.editBoard(board.id, editTitle);
         setIsEditing(false);
     };
 
@@ -52,7 +52,7 @@ export default function SortableBoardItem({ board, boardActions }: Props) {
     const handleDelete = (e: React.MouseEvent) => {
         e.stopPropagation();
         if (window.confirm("정말로 이 보드를 삭제하시겠습니까?")) {
-            boardActions.onDelete(board.id);
+            boardActions.deleteBoard(board.id);
         }
     };
 
@@ -123,13 +123,13 @@ export default function SortableBoardItem({ board, boardActions }: Props) {
             </div>
 
             <TaskForm
-                onSubmit={(title) => boardActions.onTaskAdd(board.id, title)}
+                onSubmit={(title) => boardActions.addTask(board.id, title)}
             />
             <TaskList
                 tasks={board.tasks}
                 boardId={board.id}
-                onTaskEdit={boardActions.onTaskEdit}
-                onTaskDelete={boardActions.onTaskDelete}
+                onTaskEdit={boardActions.editTask}
+                onTaskDelete={boardActions.deleteTask}
             />
         </div>
     );

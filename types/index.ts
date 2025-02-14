@@ -12,14 +12,14 @@ export interface Board {
 }
 
 export interface BoardAction {
-    onEdit: (id: string, title: string) => void;
-    onDelete: (id: string) => void;
-    onReorder: (boards: Board[]) => void;
-    onTaskAdd: (boardId: string, content: string) => void;
-    onTaskEdit: (boardId: string, taskId: string, content: string) => void;
-    onTaskDelete: (boardId: string, taskId: string) => void;
-    onTaskReorder: (boardId: string, tasks: Task[]) => void;
-    onTaskMove: (
+    editBoard: (id: string, title: string) => void;
+    deleteBoard: (id: string) => void;
+    reorderBoards: (boards: Board[]) => void;
+    addTask: (boardId: string, content: string) => void;
+    editTask: (boardId: string, taskId: string, content: string) => void;
+    deleteTask: (boardId: string, taskId: string) => void;
+    reoderTask: (boardId: string, tasks: Task[]) => void;
+    moveTask: (
         taskId: string,
         sourceBoardId: string,
         targetBoardId: string
