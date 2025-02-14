@@ -1,5 +1,5 @@
 import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
+import { CSS, Transform } from "@dnd-kit/utilities";
 import { Board, BoardAction } from "@/types";
 import { useState } from "react";
 import TaskForm from "./TaskForm";
@@ -23,10 +23,18 @@ export default function SortableBoardItem({ board, boardActions }: Props) {
         isDragging
     } = useSortable({ id: board.id });
 
+    const transformObject: Transform = {
+        x: transform?.x ?? 0,
+        y: transform?.y ?? 0,
+        scaleX: 1,
+        scaleY: 1
+    };
+
     const style = {
-        transform: CSS.Transform.toString(transform),
-        transition,
-        opacity: isDragging ? 0.5 : 1
+        transform: CSS.Transform.toString(transformObject),
+        transition: isDragging ? "transform 250ms ease" : transition,
+        zIndex: isDragging ? 999 : "auto",
+        position: "relative" as const // 타입 단언 대신 리터럴 타입 사용
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -53,7 +61,9 @@ export default function SortableBoardItem({ board, boardActions }: Props) {
             <div
                 ref={setNodeRef}
                 style={style}
-                className="p-4 bg-white rounded-lg shadow"
+                className={`transform-gpu ${
+                    isDragging ? "shadow-xl" : "shadow"
+                } hover:shadow-md`}
             >
                 <form onSubmit={handleSubmit} className="space-y-2">
                     <input
@@ -91,11 +101,7 @@ export default function SortableBoardItem({ board, boardActions }: Props) {
             className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
         >
             <div className="flex items-center justify-between">
-                <div
-                    {...attributes}
-                    {...listeners}
-                    className="flex-1 cursor-move"
-                >
+                <div {...attributes} {...listeners} className="cursor-grab">
                     <h3 className="text-lg font-semibold text-black">
                         {board.title}
                     </h3>
