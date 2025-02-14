@@ -21,7 +21,7 @@ export default function BoardList({ boards, boardActions }: Props) {
             const targetBoardId = over.data.current?.boardId || over.id;
 
             if (sourceBoardId !== targetBoardId) {
-                boardActions.onTaskMove(taskId, sourceBoardId, targetBoardId);
+                boardActions.moveTask(taskId, sourceBoardId, targetBoardId);
                 return;
             }
 
@@ -39,7 +39,7 @@ export default function BoardList({ boards, boardActions }: Props) {
                         oldIndex,
                         newIndex
                     );
-                    boardActions.onTaskReorder(sourceBoardId, newTasks);
+                    boardActions.reorderTask(sourceBoardId, newTasks);
                 }
             }
         }
@@ -49,7 +49,7 @@ export default function BoardList({ boards, boardActions }: Props) {
                 (board) => board.id === active.id
             );
             const newIndex = boards.findIndex((board) => board.id === over.id);
-            boardActions.onReorder(arrayMove(boards, oldIndex, newIndex));
+            boardActions.reorderBoards(arrayMove(boards, oldIndex, newIndex));
         }
     };
 

@@ -99,7 +99,7 @@ export default function BoardContainer() {
         saveBoardInStorage(updatedBoards);
     };
 
-    const reoderTask = (boardId: string, tasks: Task[]) => {
+    const reorderTask = (boardId: string, tasks: Task[]) => {
         const updatedBoards = boards.map((board) => {
             if (board.id === boardId) {
                 return {
@@ -150,7 +150,7 @@ export default function BoardContainer() {
         addTask,
         editTask,
         deleteTask,
-        reoderTask,
+        reorderTask,
         moveTask
     };
 

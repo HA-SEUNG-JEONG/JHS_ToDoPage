@@ -18,7 +18,7 @@ export interface BoardAction {
     addTask: (boardId: string, content: string) => void;
     editTask: (boardId: string, taskId: string, content: string) => void;
     deleteTask: (boardId: string, taskId: string) => void;
-    reoderTask: (boardId: string, tasks: Task[]) => void;
+    reorderTask: (boardId: string, tasks: Task[]) => void;
     moveTask: (
         taskId: string,
         sourceBoardId: string,
