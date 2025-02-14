@@ -5,7 +5,7 @@ type Props = {
     onSubmit: (title: string) => void;
 };
 
-export default function TaskForm({ onSubmit }: Props) {
+export default function AddTaskForm({ onSubmit }: Props) {
     const [title, setTitle] = useState("");
 
     const handleSubmit = (e: React.FormEvent) => {

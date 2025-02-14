@@ -2,8 +2,8 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS, Transform } from "@dnd-kit/utilities";
 import { Board, BoardAction } from "@/types";
 import { useState } from "react";
-import TaskForm from "./TaskForm";
 import TaskList from "./TaskList";
+import AddTaskForm from "./AddTaskForm";
 
 type Props = {
     board: Board;
@@ -122,7 +122,7 @@ export default function SortableBoardItem({ board, boardActions }: Props) {
                 )}
             </div>
 
-            <TaskForm
+            <AddTaskForm
                 onSubmit={(title) => boardActions.addTask(board.id, title)}
             />
             <TaskList
