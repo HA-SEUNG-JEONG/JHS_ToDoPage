@@ -124,25 +124,24 @@ export default function BoardContainer() {
         sourceBoardId: string,
         targetBoardId: string
     ) => {
-        // 변경된 부분: 깊은 복사 적용
         const updatedBoards = boards.map((board) => {
-            // 소스 보드에서 삭제
             if (board.id === sourceBoardId) {
                 return {
                     ...board,
                     tasks: board.tasks.filter((t) => t.id !== taskId)
                 };
             }
-            // 타겟 보드에 추가
             if (board.id === targetBoardId) {
                 const taskToMove = boards
                     .find((b) => b.id === sourceBoardId)
                     ?.tasks.find((t) => t.id === taskId);
 
-                return {
-                    ...board,
-                    tasks: [...(board.tasks || []), taskToMove!] // 빈 배열 보정
-                };
+                if (taskToMove) {
+                    return {
+                        ...board,
+                        tasks: [...(board.tasks || []), { ...taskToMove }]
+                    };
+                }
             }
             return board;
         });

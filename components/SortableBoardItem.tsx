@@ -130,7 +130,6 @@ export default function SortableBoardItem({ board, boardActions }: Props) {
                 boardId={board.id}
                 onTaskEdit={boardActions.onTaskEdit}
                 onTaskDelete={boardActions.onTaskDelete}
-                onTaskReorder={boardActions.onTaskReorder}
             />
         </div>
     );

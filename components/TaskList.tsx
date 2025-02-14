@@ -12,15 +12,13 @@ type Props = {
     boardId: string;
     onTaskEdit: (boardId: string, taskId: string, title: string) => void;
     onTaskDelete: (boardId: string, taskId: string) => void;
-    onTaskReorder: (boardId: string, tasks: Task[]) => void;
 };
 
 export default function TaskList({
     tasks = [],
     boardId,
     onTaskEdit,
-    onTaskDelete,
-    onTaskReorder
+    onTaskDelete
 }: Props) {
     const { setNodeRef, isOver } = useDroppable({
         id: boardId,

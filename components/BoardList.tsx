@@ -1,4 +1,3 @@
-// components/Board/BoardList.tsx
 import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import { Board, BoardAction } from "@/types";
@@ -15,26 +14,42 @@ export default function BoardList({ boards, boardActions }: Props) {
         const { active, over } = event;
         if (!over) return;
 
-        // if (over && active.id !== over.id) {
-        //     const oldIndex = boards.findIndex(
-        //         (board) => board.id === active.id
-        //     );
-        //     const newIndex = boards.findIndex((board) => board.id === over.id);
-        //     const reorderedBoards = arrayMove(boards, oldIndex, newIndex);
-        //     boardActions.onReorder(reorderedBoards);
-        // }
-
+        // 보드 간 할일 이동
         if (active.data.current?.type === "Task") {
             const taskId = active.id as string;
-            console.log("taskId: ", taskId);
             const sourceBoardId = active.data.current.boardId;
-            console.log("sourceBoardId: ", sourceBoardId);
-            const targetBoardId = over.data.current?.boardId;
-            console.log("targetBoardId: ", targetBoardId);
+            const targetBoardId = over.data.current?.boardId || over.id;
 
             if (sourceBoardId !== targetBoardId) {
                 boardActions.onTaskMove(taskId, sourceBoardId, targetBoardId);
+                return;
             }
+
+            // 같은 보드 내 할일 순서 변경
+            if (sourceBoardId === targetBoardId) {
+                const board = boards.find((b) => b.id === sourceBoardId);
+                if (!board) return;
+
+                const oldIndex = board.tasks.findIndex((t) => t.id === taskId);
+                const newIndex = board.tasks.findIndex((t) => t.id === over.id);
+
+                if (oldIndex !== -1 && newIndex !== -1) {
+                    const newTasks = arrayMove(
+                        [...board.tasks],
+                        oldIndex,
+                        newIndex
+                    );
+                    boardActions.onTaskReorder(sourceBoardId, newTasks);
+                }
+            }
+        }
+        // 보드 순서 변경
+        else if (active.id !== over.id) {
+            const oldIndex = boards.findIndex(
+                (board) => board.id === active.id
+            );
+            const newIndex = boards.findIndex((board) => board.id === over.id);
+            boardActions.onReorder(arrayMove(boards, oldIndex, newIndex));
         }
     };
 
