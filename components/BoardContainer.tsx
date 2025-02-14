@@ -9,6 +9,11 @@ import CreateBoardForm from "./CreateBoardForm";
 export default function BoardContainer() {
     const [boards, setBoards] = useState<Board[]>([]);
 
+    const saveBoardInStorage = (board: Board[]) => {
+        setBoards(board);
+        storageUtil.saveBoards(board);
+    };
+
     useEffect(() => {
         const savedBoards = storageUtil.getBoards();
         setBoards(savedBoards);
@@ -22,22 +27,19 @@ export default function BoardContainer() {
         };
 
         const updatedBoards = [...boards, newBoard];
-        setBoards(updatedBoards);
-        storageUtil.saveBoards(updatedBoards);
+        saveBoardInStorage(updatedBoards);
     };
 
     const handleEditBoard = (id: string, newTitle: string) => {
         const updatedBoards = boards.map((board) =>
             board.id === id ? { ...board, title: newTitle } : board
         );
-        setBoards(updatedBoards);
-        storageUtil.saveBoards(updatedBoards);
+        saveBoardInStorage(updatedBoards);
     };
 
     const handleDeleteBoard = (id: string) => {
         const updatedBoards = boards.filter((board) => board.id !== id);
-        setBoards(updatedBoards);
-        storageUtil.saveBoards(updatedBoards);
+        saveBoardInStorage(updatedBoards);
     };
 
     const handleReorderBoards = (reorderedBoards: Board[]) => {
@@ -66,8 +68,7 @@ export default function BoardContainer() {
             return board;
         });
 
-        setBoards(updatedBoards);
-        storageUtil.saveBoards(updatedBoards);
+        saveBoardInStorage(updatedBoards);
     };
 
     const handleTaskEdit = (
@@ -85,8 +86,7 @@ export default function BoardContainer() {
             return board;
         });
 
-        setBoards(updatedBoards);
-        storageUtil.saveBoards(updatedBoards);
+        saveBoardInStorage(updatedBoards);
     };
 
     const handleTaskDelete = (boardId: string, taskId: string) => {
@@ -100,8 +100,7 @@ export default function BoardContainer() {
             return board;
         });
 
-        setBoards(updatedBoards);
-        storageUtil.saveBoards(updatedBoards);
+        saveBoardInStorage(updatedBoards);
     };
 
     const handleTaskReorder = (boardId: string, tasks: Task[]) => {
@@ -115,8 +114,7 @@ export default function BoardContainer() {
             return board;
         });
 
-        setBoards(updatedBoards);
-        storageUtil.saveBoards(updatedBoards);
+        saveBoardInStorage(updatedBoards);
     };
 
     const handleTaskMove = (
@@ -146,8 +144,7 @@ export default function BoardContainer() {
             return board;
         });
 
-        setBoards(updatedBoards);
-        storageUtil.saveBoards(updatedBoards);
+        saveBoardInStorage(updatedBoards);
     };
 
     return (
