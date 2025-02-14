@@ -2,6 +2,7 @@
 export interface Task {
     id: string;
     title: string;
+    boardId: string;
 }
 
 export interface Board {
@@ -18,4 +19,9 @@ export interface BoardAction {
     onTaskEdit: (boardId: string, taskId: string, content: string) => void;
     onTaskDelete: (boardId: string, taskId: string) => void;
     onTaskReorder: (boardId: string, tasks: Task[]) => void;
+    onTaskMove: (
+        taskId: string,
+        sourceBoardId: string,
+        targetBoardId: string
+    ) => void;
 }

@@ -13,14 +13,28 @@ type Props = {
 export default function BoardList({ boards, boardActions }: Props) {
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
+        if (!over) return;
 
-        if (over && active.id !== over.id) {
-            const oldIndex = boards.findIndex(
-                (board) => board.id === active.id
-            );
-            const newIndex = boards.findIndex((board) => board.id === over.id);
-            const reorderedBoards = arrayMove(boards, oldIndex, newIndex);
-            boardActions.onReorder(reorderedBoards);
+        // if (over && active.id !== over.id) {
+        //     const oldIndex = boards.findIndex(
+        //         (board) => board.id === active.id
+        //     );
+        //     const newIndex = boards.findIndex((board) => board.id === over.id);
+        //     const reorderedBoards = arrayMove(boards, oldIndex, newIndex);
+        //     boardActions.onReorder(reorderedBoards);
+        // }
+
+        if (active.data.current?.type === "Task") {
+            const taskId = active.id as string;
+            console.log("taskId: ", taskId);
+            const sourceBoardId = active.data.current.boardId;
+            console.log("sourceBoardId: ", sourceBoardId);
+            const targetBoardId = over.data.current?.boardId;
+            console.log("targetBoardId: ", targetBoardId);
+
+            if (sourceBoardId !== targetBoardId) {
+                boardActions.onTaskMove(taskId, sourceBoardId, targetBoardId);
+            }
         }
     };
 

@@ -13,7 +13,12 @@ type Props = {
 export default function TaskItem({ task, boardId, onEdit, onDelete }: Props) {
     const { attributes, listeners, setNodeRef, transform, transition } =
         useSortable({
-            id: task.id
+            id: task.id,
+            data: {
+                type: "Task",
+                boardId,
+                task
+            }
         });
 
     const style = {

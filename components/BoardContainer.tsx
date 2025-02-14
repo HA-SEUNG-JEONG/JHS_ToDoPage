@@ -58,7 +58,7 @@ export default function BoardContainer() {
                         {
                             id: crypto.randomUUID(),
                             title,
-                            createdAt: new Date().toISOString()
+                            boardId
                         }
                     ]
                 };
@@ -109,7 +109,39 @@ export default function BoardContainer() {
             if (board.id === boardId) {
                 return {
                     ...board,
-                    tasks: tasks
+                    tasks: [...tasks]
+                };
+            }
+            return board;
+        });
+
+        setBoards(updatedBoards);
+        storageUtil.saveBoards(updatedBoards);
+    };
+
+    const handleTaskMove = (
+        taskId: string,
+        sourceBoardId: string,
+        targetBoardId: string
+    ) => {
+        // 변경된 부분: 깊은 복사 적용
+        const updatedBoards = boards.map((board) => {
+            // 소스 보드에서 삭제
+            if (board.id === sourceBoardId) {
+                return {
+                    ...board,
+                    tasks: board.tasks.filter((t) => t.id !== taskId)
+                };
+            }
+            // 타겟 보드에 추가
+            if (board.id === targetBoardId) {
+                const taskToMove = boards
+                    .find((b) => b.id === sourceBoardId)
+                    ?.tasks.find((t) => t.id === taskId);
+
+                return {
+                    ...board,
+                    tasks: [...(board.tasks || []), taskToMove!] // 빈 배열 보정
                 };
             }
             return board;
@@ -131,7 +163,8 @@ export default function BoardContainer() {
                     onTaskAdd: handleTaskAdd,
                     onTaskEdit: handleTaskEdit,
                     onTaskDelete: handleTaskDelete,
-                    onTaskReorder: handleTaskReorder
+                    onTaskReorder: handleTaskReorder,
+                    onTaskMove: handleTaskMove
                 }}
             />
         </div>

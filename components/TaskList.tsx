@@ -1,11 +1,11 @@
-import { Task } from "@/types";
-import TaskItem from "./TaskItem";
-import { DndContext, DragEndEvent } from "@dnd-kit/core";
+// components/Board/TaskList.tsx
+import { useDroppable } from "@dnd-kit/core";
 import {
-    arrayMove,
     SortableContext,
     verticalListSortingStrategy
 } from "@dnd-kit/sortable";
+import { Task } from "@/types";
+import TaskItem from "./TaskItem";
 
 type Props = {
     tasks: Task[];
@@ -22,38 +22,43 @@ export default function TaskList({
     onTaskDelete,
     onTaskReorder
 }: Props) {
-    if (tasks?.length === 0) return null;
-
-    const handleDragEnd = (event: DragEndEvent) => {
-        const { active, over } = event;
-
-        if (over && active.id !== over.id) {
-            const oldIndex = tasks.findIndex((task) => task.id === active.id);
-            const newIndex = tasks.findIndex((task) => task.id === over.id);
-            const reorderedIndex = arrayMove(tasks, oldIndex, newIndex);
-
-            onTaskReorder(boardId, reorderedIndex);
+    const { setNodeRef, isOver } = useDroppable({
+        id: boardId,
+        data: {
+            type: "Board",
+            boardId: boardId
         }
-    };
+    });
 
     return (
-        <DndContext onDragEnd={handleDragEnd}>
+        <div
+            ref={setNodeRef}
+            className={`min-h-[100px] rounded-lg transition-colors ${
+                isOver ? "bg-blue-50" : "bg-transparent"
+            }`}
+        >
             <SortableContext
-                items={tasks?.map((task) => task.id)}
+                items={tasks.map((task) => task.id)}
                 strategy={verticalListSortingStrategy}
             >
                 <ul className="mt-3 space-y-2">
-                    {tasks?.map((task) => (
-                        <TaskItem
-                            key={task.id}
-                            task={task}
-                            boardId={boardId}
-                            onEdit={onTaskEdit}
-                            onDelete={onTaskDelete}
-                        />
-                    ))}
+                    {tasks.length === 0 ? (
+                        <li className="px-3 py-2 text-sm text-gray-500 text-center">
+                            {isOver ? "여기에 놓기" : "할 일이 없습니다"}
+                        </li>
+                    ) : (
+                        tasks.map((task) => (
+                            <TaskItem
+                                key={task.id}
+                                task={task}
+                                boardId={boardId}
+                                onEdit={onTaskEdit}
+                                onDelete={onTaskDelete}
+                            />
+                        ))
+                    )}
                 </ul>
             </SortableContext>
-        </DndContext>
+        </div>
     );
 }
