@@ -3,6 +3,7 @@ import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import { Board, BoardAction } from "@/types";
 import SortableBoardItem from "./SortableBoardItem";
+import { restrictToWindowEdges } from "@dnd-kit/modifiers";
 
 type Props = {
     boards: Board[];
@@ -35,6 +36,7 @@ export default function BoardList({ boards, boardActions }: Props) {
         <DndContext
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
+            modifiers={[restrictToWindowEdges]}
         >
             <SortableContext items={boards.map((board) => board.id)}>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
