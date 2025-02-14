@@ -1,4 +1,3 @@
-// components/Board/SortableBoardItem.tsx
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Board, BoardAction } from "@/types";
@@ -129,6 +128,7 @@ export default function SortableBoardItem({ board, boardActions }: Props) {
                     tasks={board.tasks}
                     boardId={board.id}
                     onTaskEdit={boardActions.onTaskEdit}
+                    onTaskDelete={boardActions.onTaskDelete}
                 />
             </div>
         </div>

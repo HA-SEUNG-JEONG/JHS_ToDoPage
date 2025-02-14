@@ -5,9 +5,10 @@ type Props = {
     task: Task;
     boardId: string;
     onEdit: (boardId: string, taskId: string, title: string) => void;
+    onDelete: (boardId: string, taskId: string) => void;
 };
 
-export default function TaskItem({ task, boardId, onEdit }: Props) {
+export default function TaskItem({ task, boardId, onEdit, onDelete }: Props) {
     const [isEditing, setIsEditing] = useState(false);
     const [editTitle, setEditTitle] = useState(task.title);
 
@@ -21,6 +22,12 @@ export default function TaskItem({ task, boardId, onEdit }: Props) {
     const handleCancel = () => {
         setEditTitle(task.title);
         setIsEditing(false);
+    };
+
+    const handleDelete = () => {
+        if (window.confirm("이 할 일을 삭제하시겠습니까?")) {
+            onDelete(boardId, task.id);
+        }
     };
 
     if (isEditing) {
@@ -58,12 +65,20 @@ export default function TaskItem({ task, boardId, onEdit }: Props) {
     return (
         <li className="group px-3 py-2 bg-white rounded-lg border border-gray-200 flex justify-between items-center hover:shadow-sm transition-shadow">
             <span className="text-sm text-gray-700">{task.title}</span>
-            <button
-                onClick={() => setIsEditing(true)}
-                className="opacity-0 group-hover:opacity-100 text-xs text-gray-500 hover:text-blue-500 transition-opacity px-2 py-1"
-            >
-                수정
-            </button>
+            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <button
+                    onClick={() => setIsEditing(true)}
+                    className="text-xs text-gray-500 hover:text-blue-500 px-2 py-1"
+                >
+                    수정
+                </button>
+                <button
+                    onClick={handleDelete}
+                    className="text-xs text-gray-500 hover:text-red-500 px-2 py-1"
+                >
+                    삭제
+                </button>
+            </div>
         </li>
     );
 }

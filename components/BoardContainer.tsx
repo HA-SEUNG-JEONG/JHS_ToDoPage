@@ -36,13 +36,13 @@ export default function BoardContainer() {
 
     const handleDeleteBoard = (id: string) => {
         const updatedBoards = boards.filter((board) => board.id !== id);
-        setBoards(boards.filter((board) => board.id !== id));
+        setBoards(updatedBoards);
         storageUtil.saveBoards(updatedBoards);
     };
 
-    const handleReorderBoards = (reorderBoards: Board[]) => {
-        setBoards(reorderBoards);
-        storageUtil.saveBoards(reorderBoards);
+    const handleReorderBoards = (reorderedBoards: Board[]) => {
+        setBoards(reorderedBoards);
+        storageUtil.saveBoards(reorderedBoards);
     };
 
     const handleTaskAdd = (boardId: string, title: string) => {
@@ -89,20 +89,33 @@ export default function BoardContainer() {
         storageUtil.saveBoards(updatedBoards);
     };
 
+    const handleTaskDelete = (boardId: string, taskId: string) => {
+        const updatedBoards = boards.map((board) => {
+            if (board.id === boardId) {
+                return {
+                    ...board,
+                    tasks: board.tasks.filter((task) => task.id !== taskId)
+                };
+            }
+            return board;
+        });
+
+        setBoards(updatedBoards);
+        storageUtil.saveBoards(updatedBoards);
+    };
+
     return (
         <div className="p-6">
             <CreateBoardForm onSubmit={handleCreateBoard} />
             <BoardList
                 boards={boards}
-                // onEdit={handleEditBoard}
-                // onDelete={handleDeleteBoard}
-                // onReorder={handleReorderBoard}
                 boardActions={{
                     onEdit: handleEditBoard,
                     onDelete: handleDeleteBoard,
                     onReorder: handleReorderBoards,
                     onTaskAdd: handleTaskAdd,
-                    onTaskEdit: handleTaskEdit
+                    onTaskEdit: handleTaskEdit,
+                    onTaskDelete: handleTaskDelete
                 }}
             />
         </div>

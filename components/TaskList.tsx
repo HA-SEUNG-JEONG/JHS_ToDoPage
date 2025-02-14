@@ -5,9 +5,15 @@ type Props = {
     tasks: Task[];
     boardId: string;
     onTaskEdit: (boardId: string, taskId: string, title: string) => void;
+    onTaskDelete: (boardId: string, taskId: string) => void;
 };
 
-export default function TaskList({ tasks, boardId, onTaskEdit }: Props) {
+export default function TaskList({
+    tasks,
+    boardId,
+    onTaskEdit,
+    onTaskDelete
+}: Props) {
     if (tasks?.length === 0) return null;
 
     return (
@@ -18,6 +24,7 @@ export default function TaskList({ tasks, boardId, onTaskEdit }: Props) {
                     task={task}
                     boardId={boardId}
                     onEdit={onTaskEdit}
+                    onDelete={onTaskDelete}
                 />
             ))}
         </ul>
