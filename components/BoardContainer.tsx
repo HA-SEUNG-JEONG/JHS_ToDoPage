@@ -39,6 +39,11 @@ export default function BoardContainer() {
         storageUtil.saveBoards(updatedBoards);
     };
 
+    const handleReorderBoard = (reorderBoards: Board[]) => {
+        setBoards(reorderBoards);
+        storageUtil.saveBoards(reorderBoards);
+    };
+
     return (
         <div className="p-6">
             <CreateBoardForm onSubmit={handleCreateBoard} />
@@ -46,6 +51,7 @@ export default function BoardContainer() {
                 boards={boards}
                 onEdit={handleEditBoard}
                 onDelete={handleDeleteBoard}
+                onReorder={handleReorderBoard}
             />
         </div>
     );
