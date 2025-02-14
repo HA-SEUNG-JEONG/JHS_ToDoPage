@@ -2,8 +2,8 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS, Transform } from "@dnd-kit/utilities";
 import { Board, BoardAction } from "@/types";
 import { useState } from "react";
-import TaskList from "./TaskList";
-import AddTaskForm from "./AddTaskForm";
+import TaskList from "../Task/TaskList";
+import AddTaskForm from "../Task/AddTaskForm";
 
 type Props = {
     board: Board;
