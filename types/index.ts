@@ -5,4 +5,5 @@ export interface Board {
 
 export type BoardAction = {
     onEdit: (id: string, title: string) => void;
+    onDelete: (id: string) => void;
 };

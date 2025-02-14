@@ -4,9 +4,10 @@ import BoardItem from "./BoardItem";
 type Props = {
     boards: Board[];
     onEdit: BoardAction["onEdit"];
+    onDelete: BoardAction["onDelete"];
 };
 
-export default function BoardList({ boards, onEdit }: Props) {
+export default function BoardList({ boards, onEdit, onDelete }: Props) {
     if (boards.length === 0) {
         return (
             <div className="text-center text-gray-500 py-10">
@@ -18,7 +19,12 @@ export default function BoardList({ boards, onEdit }: Props) {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {boards.map((board) => (
-                <BoardItem key={board.id} board={board} onEdit={onEdit} />
+                <BoardItem
+                    key={board.id}
+                    board={board}
+                    onEdit={onEdit}
+                    onDelete={onDelete}
+                />
             ))}
         </div>
     );
