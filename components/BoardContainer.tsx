@@ -25,10 +25,18 @@ export default function BoardContainer() {
         storageUtil.saveBoards(updatedBoards);
     };
 
+    const handleEditBoard = (id: string, newTitle: string) => {
+        const updatedBoards = boards.map((board) =>
+            board.id === id ? { ...board, title: newTitle } : board
+        );
+        setBoards(updatedBoards);
+        storageUtil.saveBoards(updatedBoards);
+    };
+
     return (
         <div className="p-6">
             <CreateBoardForm onSubmit={handleCreateBoard} />
-            <BoardList boards={boards} />
+            <BoardList boards={boards} onEdit={handleEditBoard} />
         </div>
     );
 }
