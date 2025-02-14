@@ -125,7 +125,11 @@ export default function SortableBoardItem({ board, boardActions }: Props) {
                         boardActions.onTaskAdd(board.id, title)
                     }
                 />
-                <TaskList tasks={board.tasks} />
+                <TaskList
+                    tasks={board.tasks}
+                    boardId={board.id}
+                    onTaskEdit={boardActions.onTaskEdit}
+                />
             </div>
         </div>
     );

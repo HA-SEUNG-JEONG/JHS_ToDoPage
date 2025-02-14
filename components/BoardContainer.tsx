@@ -70,6 +70,25 @@ export default function BoardContainer() {
         storageUtil.saveBoards(updatedBoards);
     };
 
+    const handleTaskEdit = (
+        boardId: string,
+        taskId: string,
+        newTitle: string
+    ) => {
+        const updatedBoards = boards.map((board) => {
+            if (board.id === boardId) {
+                const updatedTasks = board.tasks.map((task) =>
+                    task.id === taskId ? { ...task, title: newTitle } : task
+                );
+                return { ...board, tasks: updatedTasks };
+            }
+            return board;
+        });
+
+        setBoards(updatedBoards);
+        storageUtil.saveBoards(updatedBoards);
+    };
+
     return (
         <div className="p-6">
             <CreateBoardForm onSubmit={handleCreateBoard} />
@@ -82,7 +101,8 @@ export default function BoardContainer() {
                     onEdit: handleEditBoard,
                     onDelete: handleDeleteBoard,
                     onReorder: handleReorderBoards,
-                    onTaskAdd: handleTaskAdd
+                    onTaskAdd: handleTaskAdd,
+                    onTaskEdit: handleTaskEdit
                 }}
             />
         </div>

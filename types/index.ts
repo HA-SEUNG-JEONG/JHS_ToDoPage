@@ -15,4 +15,5 @@ export interface BoardAction {
     onDelete: (id: string) => void;
     onReorder: (boards: Board[]) => void;
     onTaskAdd: (boardId: string, content: string) => void;
+    onTaskEdit: (boardId: string, taskId: string, content: string) => void;
 }
