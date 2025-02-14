@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Board, BoardAction } from "@/types";
 
-type Props = {
+type BoardProps = {
     board: Board;
-    onEdit: BoardAction["onEdit"];
-    onDelete: BoardAction["onDelete"];
+    onEdit: BoardAction["editBoard"];
+    onDelete: BoardAction["deleteBoard"];
 };
 
-export default function BoardItem({ board, onEdit, onDelete }: Props) {
+export default function BoardItem({ board, onEdit, onDelete }: BoardProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [editTitle, setEditTitle] = useState(board.title);
 
