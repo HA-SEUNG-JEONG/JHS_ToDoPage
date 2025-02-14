@@ -1,21 +1,15 @@
+// components/Board/BoardList.tsx
+import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
+import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import { Board, BoardAction } from "@/types";
-import { closestCenter, DndContext, DragEndEvent } from "@dnd-kit/core";
-import { arrayMove, SortableContext } from "@dnd-kit/sortable";
 import SortableBoardItem from "./SortableBoardItem";
 
 type Props = {
     boards: Board[];
-    onEdit: BoardAction["onEdit"];
-    onDelete: BoardAction["onDelete"];
-    onReorder: BoardAction["onReorder"];
+    boardActions: BoardAction;
 };
 
-export default function BoardList({
-    boards,
-    onEdit,
-    onDelete,
-    onReorder
-}: Props) {
+export default function BoardList({ boards, boardActions }: Props) {
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
 
@@ -24,10 +18,11 @@ export default function BoardList({
                 (board) => board.id === active.id
             );
             const newIndex = boards.findIndex((board) => board.id === over.id);
-            const reorderBoards = arrayMove(boards, oldIndex, newIndex);
-            onReorder(reorderBoards);
+            const reorderedBoards = arrayMove(boards, oldIndex, newIndex);
+            boardActions.onReorder(reorderedBoards);
         }
     };
+
     if (boards.length === 0) {
         return (
             <div className="text-center text-gray-500 py-10">
@@ -47,8 +42,7 @@ export default function BoardList({
                         <SortableBoardItem
                             key={board.id}
                             board={board}
-                            onEdit={onEdit}
-                            onDelete={onDelete}
+                            boardActions={boardActions}
                         />
                     ))}
                 </div>

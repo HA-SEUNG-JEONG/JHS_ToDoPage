@@ -17,7 +17,8 @@ export default function BoardContainer() {
     const handleCreateBoard = (title: string) => {
         const newBoard: Board = {
             id: crypto.randomUUID(),
-            title
+            title,
+            tasks: []
         };
 
         const updatedBoards = [...boards, newBoard];
@@ -39,9 +40,34 @@ export default function BoardContainer() {
         storageUtil.saveBoards(updatedBoards);
     };
 
-    const handleReorderBoard = (reorderBoards: Board[]) => {
+    const handleReorderBoards = (reorderBoards: Board[]) => {
         setBoards(reorderBoards);
         storageUtil.saveBoards(reorderBoards);
+    };
+
+    const handleTaskAdd = (boardId: string, title: string) => {
+        const updatedBoards = boards.map((board) => {
+            if (board.id === boardId) {
+                const currentTasks = Array.isArray(board.tasks)
+                    ? board.tasks
+                    : [];
+                return {
+                    ...board,
+                    tasks: [
+                        ...currentTasks,
+                        {
+                            id: crypto.randomUUID(),
+                            title,
+                            createdAt: new Date().toISOString()
+                        }
+                    ]
+                };
+            }
+            return board;
+        });
+
+        setBoards(updatedBoards);
+        storageUtil.saveBoards(updatedBoards);
     };
 
     return (
@@ -49,9 +75,15 @@ export default function BoardContainer() {
             <CreateBoardForm onSubmit={handleCreateBoard} />
             <BoardList
                 boards={boards}
-                onEdit={handleEditBoard}
-                onDelete={handleDeleteBoard}
-                onReorder={handleReorderBoard}
+                // onEdit={handleEditBoard}
+                // onDelete={handleDeleteBoard}
+                // onReorder={handleReorderBoard}
+                boardActions={{
+                    onEdit: handleEditBoard,
+                    onDelete: handleDeleteBoard,
+                    onReorder: handleReorderBoards,
+                    onTaskAdd: handleTaskAdd
+                }}
             />
         </div>
     );

@@ -3,14 +3,15 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Board, BoardAction } from "@/types";
 import { useState } from "react";
+import TaskForm from "./TaskForm";
+import TaskList from "./TaskList";
 
 type Props = {
     board: Board;
-    onEdit: BoardAction["onEdit"];
-    onDelete: BoardAction["onDelete"];
+    boardActions: BoardAction;
 };
 
-export default function SortableBoardItem({ board, onEdit, onDelete }: Props) {
+export default function SortableBoardItem({ board, boardActions }: Props) {
     const [isEditing, setIsEditing] = useState(false);
     const [editTitle, setEditTitle] = useState(board.title);
 
@@ -32,7 +33,7 @@ export default function SortableBoardItem({ board, onEdit, onDelete }: Props) {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!editTitle.trim()) return;
-        onEdit(board.id, editTitle);
+        boardActions.onEdit(board.id, editTitle);
         setIsEditing(false);
     };
 
@@ -44,7 +45,7 @@ export default function SortableBoardItem({ board, onEdit, onDelete }: Props) {
     const handleDelete = (e: React.MouseEvent) => {
         e.stopPropagation();
         if (window.confirm("정말로 이 보드를 삭제하시겠습니까?")) {
-            onDelete(board.id);
+            boardActions.onDelete(board.id);
         }
     };
 
@@ -96,7 +97,9 @@ export default function SortableBoardItem({ board, onEdit, onDelete }: Props) {
                     {...listeners}
                     className="flex-1 cursor-move"
                 >
-                    <h3 className="text-lg font-semibold">{board.title}</h3>
+                    <h3 className="text-lg font-semibold text-black">
+                        {board.title}
+                    </h3>
                 </div>
                 <div className="flex gap-2 ml-4">
                     <button
@@ -115,6 +118,14 @@ export default function SortableBoardItem({ board, onEdit, onDelete }: Props) {
                         <span className="text-sm">삭제</span>
                     </button>
                 </div>
+            </div>
+            <div className="mt-4">
+                <TaskForm
+                    onSubmit={(title) =>
+                        boardActions.onTaskAdd(board.id, title)
+                    }
+                />
+                <TaskList tasks={board.tasks} />
             </div>
         </div>
     );
