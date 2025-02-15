@@ -1,8 +1,11 @@
 import {
+    Active,
     DndContext,
     DragEndEvent,
     MouseSensor,
+    Over,
     TouchSensor,
+    UniqueIdentifier,
     closestCenter,
     useSensor,
     useSensors
@@ -32,51 +35,69 @@ export default function BoardList({ boards, boardActions }: Props) {
         })
     );
 
+    const moveTaskBetweenBoard = (active: Active, over: Over) => {
+        const { id } = active;
+        const sourceBoardId: string = active.data.current?.boardId;
+        const targetBoardId: string = over.data.current?.boardId;
+
+        if (sourceBoardId !== targetBoardId) {
+            boardActions.moveTaskBetweenBoards(
+                id,
+                sourceBoardId,
+                targetBoardId
+            );
+            return;
+        }
+    };
+
+    const moveTaskInBoard = (active: Active, over: Over) => {
+        const { id } = active;
+        const sourceBoardId: string = active.data.current?.boardId;
+        const targetBoardId: string = over.data.current?.boardId;
+
+        if (sourceBoardId === targetBoardId) {
+            const board = boards.find((board) => board.id === sourceBoardId);
+            if (!board) return;
+
+            const oldIndex = board.tasks.findIndex((task) => task.id === id);
+            const newIndex = board.tasks.findIndex(
+                (task) => task.id === over.id
+            );
+
+            if (oldIndex !== -1 && newIndex !== -1) {
+                const newTasks = arrayMove(
+                    [...board.tasks],
+                    oldIndex,
+                    newIndex
+                );
+                boardActions.reorderTaskInBoard(sourceBoardId, newTasks);
+            }
+        }
+    };
+
+    const moveBoard = (
+        activeId: UniqueIdentifier,
+        overId: UniqueIdentifier
+    ) => {
+        const oldIndex = boards.findIndex((board) => board.id === activeId);
+        const newIndex = boards.findIndex((board) => board.id === overId);
+        boardActions.reorderBoards(arrayMove(boards, oldIndex, newIndex));
+    };
+
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
         if (!over) return;
 
         // 보드 간 할일 이동
         if (active.data.current?.type === "Task") {
-            const taskId = active.id as string;
-            const sourceBoardId = active.data.current.boardId;
-            const targetBoardId = over.data.current?.boardId || over.id;
-
-            if (sourceBoardId !== targetBoardId) {
-                boardActions.moveTaskBetweenBoards(
-                    taskId,
-                    sourceBoardId,
-                    targetBoardId
-                );
-                return;
-            }
-
+            // 보드 간 할 일 순서 변경
+            moveTaskBetweenBoard(active, over);
             // 같은 보드 내 할일 순서 변경
-            if (sourceBoardId === targetBoardId) {
-                const board = boards.find((b) => b.id === sourceBoardId);
-                if (!board) return;
-
-                const oldIndex = board.tasks.findIndex((t) => t.id === taskId);
-                const newIndex = board.tasks.findIndex((t) => t.id === over.id);
-
-                if (oldIndex !== -1 && newIndex !== -1) {
-                    const newTasks = arrayMove(
-                        [...board.tasks],
-                        oldIndex,
-                        newIndex
-                    );
-                    boardActions.reorderTaskInBoard(sourceBoardId, newTasks);
-                }
-            }
+            moveTaskInBoard(active, over);
         }
         // 보드 순서 변경
-        else if (active.id !== over.id) {
-            const oldIndex = boards.findIndex(
-                (board) => board.id === active.id
-            );
-            const newIndex = boards.findIndex((board) => board.id === over.id);
-            boardActions.reorderBoards(arrayMove(boards, oldIndex, newIndex));
-        }
+        else if (active.data.current?.type === "Board")
+            moveBoard(active.id, over.id);
     };
 
     if (boards.length === 0) {
