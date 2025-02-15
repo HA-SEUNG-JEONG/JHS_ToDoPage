@@ -28,7 +28,7 @@ export default function AddTaskForm({ onSubmit }: Props) {
                 />
                 <button
                     type="submit"
-                    className="px-3 py-2 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors"
+                    className="px-3 py-2 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed"
                     disabled={!title.trim()}
                 >
                     추가
