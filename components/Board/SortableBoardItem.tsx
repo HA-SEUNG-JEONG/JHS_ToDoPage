@@ -25,7 +25,12 @@ export default function SortableBoardItem({
         transition,
         isDragging,
         isOver
-    } = useSortable({ id: board.id });
+    } = useSortable({
+        id: board.id,
+        data: {
+            type: "Board"
+        }
+    });
 
     const transformObject: Transform = {
         x: transform?.x ?? 0,
