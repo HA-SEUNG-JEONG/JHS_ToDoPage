@@ -40,7 +40,7 @@ export default function SortableBoardItem({ board, boardActions }: Props) {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!editTitle.trim()) return;
-        boardActions.editBoard(board.id, editTitle);
+        boardActions.editBoardTitle(board.id, editTitle);
         setIsEditing(false);
     };
 
