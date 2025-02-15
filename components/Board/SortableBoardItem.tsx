@@ -14,8 +14,10 @@ export default function SortableBoardItem({
     board,
     boardActions
 }: SortableBoardItemProps) {
+    const { title, id, tasks } = board;
+
     const [isEditing, setIsEditing] = useState(false);
-    const [editTitle, setEditTitle] = useState(board.title);
+    const [editTitle, setEditTitle] = useState(title);
 
     const {
         attributes,
@@ -162,13 +164,9 @@ export default function SortableBoardItem({
             </div>
 
             <AddTaskForm
-                onSubmit={(title) => boardActions.addTask(board.id, title)}
+                onSubmit={(title) => boardActions.addTask(id, title)}
             />
-            <TaskList
-                tasks={board.tasks}
-                boardId={board.id}
-                boardActions={boardActions}
-            />
+            <TaskList tasks={tasks} boardId={id} boardActions={boardActions} />
         </div>
     );
 }
