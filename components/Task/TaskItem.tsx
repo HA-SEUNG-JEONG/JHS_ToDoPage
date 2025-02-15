@@ -1,16 +1,19 @@
 import { useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { Task } from "@/types";
+import { BoardAction, Task } from "@/types";
 
-type Props = {
+interface TaskItemProps {
     task: Task;
     boardId: string;
-    onEdit: (boardId: string, taskId: string, title: string) => void;
-    onDelete: (boardId: string, taskId: string) => void;
-};
+    boardActions: BoardAction;
+}
 
-export default function TaskItem({ task, boardId, onEdit, onDelete }: Props) {
+export default function TaskItem({
+    task,
+    boardId,
+    boardActions
+}: TaskItemProps) {
     const { attributes, listeners, setNodeRef, transform, transition } =
         useSortable({
             id: task.id,
@@ -33,7 +36,7 @@ export default function TaskItem({ task, boardId, onEdit, onDelete }: Props) {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!editTitle.trim()) return;
-        onEdit(boardId, task.id, editTitle);
+        boardActions.editTask(boardId, task.id, editTitle);
         setIsEditing(false);
     };
 
@@ -45,7 +48,7 @@ export default function TaskItem({ task, boardId, onEdit, onDelete }: Props) {
     const handleDelete = (e: React.MouseEvent) => {
         e.stopPropagation();
         if (window.confirm("이 할 일을 삭제하시겠습니까?")) {
-            onDelete(boardId, task.id);
+            boardActions.deleteTask(boardId, task.id);
         }
     };
 

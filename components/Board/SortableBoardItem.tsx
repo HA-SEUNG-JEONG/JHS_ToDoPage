@@ -5,12 +5,15 @@ import { useState } from "react";
 import TaskList from "../Task/TaskList";
 import AddTaskForm from "../Task/AddTaskForm";
 
-type Props = {
+interface SortableBoardItemProps {
     board: Board;
     boardActions: BoardAction;
-};
+}
 
-export default function SortableBoardItem({ board, boardActions }: Props) {
+export default function SortableBoardItem({
+    board,
+    boardActions
+}: SortableBoardItemProps) {
     const [isEditing, setIsEditing] = useState(false);
     const [editTitle, setEditTitle] = useState(board.title);
 
@@ -128,8 +131,7 @@ export default function SortableBoardItem({ board, boardActions }: Props) {
             <TaskList
                 tasks={board.tasks}
                 boardId={board.id}
-                onTaskEdit={boardActions.editTask}
-                onTaskDelete={boardActions.deleteTask}
+                boardActions={boardActions}
             />
         </div>
     );

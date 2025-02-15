@@ -4,22 +4,20 @@ import {
     SortableContext,
     verticalListSortingStrategy
 } from "@dnd-kit/sortable";
-import { Task } from "@/types";
+import { BoardAction, Task } from "@/types";
 import TaskItem from "./TaskItem";
 
-type Props = {
+type TaskListProps = {
     tasks: Task[];
     boardId: string;
-    onTaskEdit: (boardId: string, taskId: string, title: string) => void;
-    onTaskDelete: (boardId: string, taskId: string) => void;
+    boardActions: BoardAction;
 };
 
 export default function TaskList({
     tasks = [],
     boardId,
-    onTaskEdit,
-    onTaskDelete
-}: Props) {
+    boardActions
+}: TaskListProps) {
     const { setNodeRef, isOver } = useDroppable({
         id: boardId,
         data: {
@@ -50,8 +48,7 @@ export default function TaskList({
                                 key={task.id}
                                 task={task}
                                 boardId={boardId}
-                                onEdit={onTaskEdit}
-                                onDelete={onTaskDelete}
+                                boardActions={boardActions}
                             />
                         ))
                     )}
