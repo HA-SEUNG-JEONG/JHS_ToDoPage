@@ -1,3 +1,5 @@
+import { UniqueIdentifier } from "@dnd-kit/core";
+
 // types/board.ts
 export interface Task {
     id: string;
@@ -20,7 +22,7 @@ export interface BoardAction {
     deleteTask: (boardId: string, taskId: string) => void;
     reorderTaskInBoard: (boardId: string, tasks: Task[]) => void;
     moveTaskBetweenBoards: (
-        taskId: string,
+        taskId: UniqueIdentifier,
         sourceBoardId: string,
         targetBoardId: string
     ) => void;
