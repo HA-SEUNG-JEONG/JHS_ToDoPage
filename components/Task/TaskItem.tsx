@@ -14,20 +14,33 @@ export default function TaskItem({
     boardId,
     boardActions
 }: TaskItemProps) {
-    const { attributes, listeners, setNodeRef, transform, transition, isOver } =
-        useSortable({
-            id: task.id,
-            data: {
-                type: "Task",
-                boardId,
-                task
-            }
-        });
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isOver,
+        isDragging
+    } = useSortable({
+        id: task.id,
+        data: {
+            type: "Task",
+            boardId,
+            task
+        }
+    });
 
     const style = {
         transform: CSS.Transform.toString(transform),
-        transition,
-        zIndex: transform ? 999 : "auto"
+        transition: isDragging
+            ? "transform 250ms ease box-shadow 200ms ease"
+            : transition,
+        zIndex: transform ? 999 : "auto",
+        position: "relative" as const,
+        boxShadow: isDragging
+            ? "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0,0,0,0.5)"
+            : ""
     };
 
     const [isEditing, setIsEditing] = useState(false);
@@ -93,7 +106,7 @@ export default function TaskItem({
                             isOver ? "cursor-grabbing" : "cursor-grab"
                         } flex-1`}
                     >
-                        <span className="text-sm text-gray-700">
+                        <span className="text-sm text-gray-700 select-none">
                             {task.title}
                         </span>
                     </div>

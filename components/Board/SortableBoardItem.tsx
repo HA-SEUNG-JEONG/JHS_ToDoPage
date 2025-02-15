@@ -23,7 +23,8 @@ export default function SortableBoardItem({
         setNodeRef,
         transform,
         transition,
-        isDragging
+        isDragging,
+        isOver
     } = useSortable({ id: board.id });
 
     const transformObject: Transform = {
@@ -34,10 +35,17 @@ export default function SortableBoardItem({
     };
 
     const style = {
-        transform: CSS.Transform.toString(transformObject),
-        transition: isDragging ? "transform 250ms ease" : transition,
+        transform: CSS.Transform.toString({
+            ...transformObject
+        }),
+        transition: isDragging
+            ? "transform 250ms ease box-shadow 200ms ease"
+            : transition,
         zIndex: isDragging ? 999 : "auto",
-        position: "relative" as const
+        position: "relative" as const,
+        boxShadow: isDragging
+            ? "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0,0,0,0.5)"
+            : ""
     };
 
     const handleSubmit = (e: React.FormEvent) => {
@@ -63,7 +71,9 @@ export default function SortableBoardItem({
         <div
             ref={setNodeRef}
             style={style}
-            className="p-4 bg-white rounded-lg shadow hover:shadow-md transition-shadow"
+            className={`p-4 bg-white rounded-lg shadow-md
+                ${isOver ? "cursor-grabbing" : "cursor-grab"}
+                transition-all duration-200`}
         >
             <div className="flex items-center justify-between mb-4">
                 {isEditing ? (
@@ -100,11 +110,11 @@ export default function SortableBoardItem({
                             {...listeners}
                             className="cursor-grab flex-1"
                         >
-                            <h3 className="text-lg font-semibold text-black">
+                            <h3 className="text-lg font-semibold text-black select-none">
                                 {board.title}
                             </h3>
                         </div>
-                        <div className="flex gap-2 ml-4">
+                        <div className="flex gap-2 ml-4 select-none">
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
