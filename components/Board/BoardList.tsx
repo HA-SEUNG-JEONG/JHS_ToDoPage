@@ -1,4 +1,12 @@
-import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
+import {
+    DndContext,
+    DragEndEvent,
+    MouseSensor,
+    TouchSensor,
+    closestCenter,
+    useSensor,
+    useSensors
+} from "@dnd-kit/core";
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
 import { Board, BoardAction } from "@/types";
 import SortableBoardItem from "./SortableBoardItem";
@@ -10,6 +18,20 @@ type Props = {
 };
 
 export default function BoardList({ boards, boardActions }: Props) {
+    const sensors = useSensors(
+        useSensor(MouseSensor, {
+            activationConstraint: {
+                distance: 10
+            }
+        }),
+        useSensor(TouchSensor, {
+            activationConstraint: {
+                delay: 250,
+                tolerance: 5
+            }
+        })
+    );
+
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
         if (!over) return;
@@ -70,6 +92,7 @@ export default function BoardList({ boards, boardActions }: Props) {
             collisionDetection={closestCenter}
             onDragEnd={handleDragEnd}
             modifiers={[restrictToWindowEdges]}
+            sensors={sensors}
         >
             <SortableContext items={boards.map((board) => board.id)}>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
