@@ -14,7 +14,7 @@ export default function TaskItem({
     boardId,
     boardActions
 }: TaskItemProps) {
-    const { attributes, listeners, setNodeRef, transform, transition } =
+    const { attributes, listeners, setNodeRef, transform, transition, isOver } =
         useSortable({
             id: task.id,
             data: {
@@ -89,7 +89,9 @@ export default function TaskItem({
                     <div
                         {...attributes}
                         {...listeners}
-                        className="cursor-grab flex-1"
+                        className={`${
+                            isOver ? "cursor-grabbing" : "cursor-grab"
+                        } flex-1`}
                     >
                         <span className="text-sm text-gray-700">
                             {task.title}
