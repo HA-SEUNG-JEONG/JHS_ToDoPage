@@ -5,6 +5,7 @@ import { Board, Task } from "@/types";
 import { storageUtil } from "@/utils/storage";
 import BoardList from "./BoardList";
 import CreateBoardForm from "./CreateBoardForm";
+import { UniqueIdentifier } from "@dnd-kit/core";
 
 export default function BoardContainer() {
     const [boards, setBoards] = useState<Board[]>([]);
@@ -102,7 +103,7 @@ export default function BoardContainer() {
     };
 
     const moveTaskBetweenBoards = (
-        taskId: string,
+        taskId: UniqueIdentifier,
         sourceBoardId: string,
         targetBoardId: string
     ) => {
