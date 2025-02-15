@@ -15,26 +15,39 @@
 
 # 파일 구조
 
-📦app
-┣ 📜favicon.ico
-┣ 📜globals.css
-┣ 📜layout.tsx
-┗ 📜page.tsx
+```
+kanban_todolist
+├─ README.md
+├─ app
+│  ├─ favicon.ico
+│  ├─ globals.css
+│  ├─ layout.tsx
+│  └─ page.tsx
+├─ components
+│  ├─ Board
+│  │  ├─ BoardContainer.tsx
+│  │  ├─ BoardList.tsx
+│  │  ├─ CreateBoardForm.tsx
+│  │  └─ SortableBoardItem.tsx
+│  ├─ SaveButton.tsx
+│  └─ Task
+│     ├─ AddTaskForm.tsx
+│     ├─ TaskItem.tsx
+│     └─ TaskList.tsx
+├─ next.config.ts
+├─ package-lock.json
+├─ package.json
+├─ public
+│  ├─ file.svg
+│  ├─ globe.svg
+│  ├─ next.svg
+│  ├─ vercel.svg
+│  └─ window.svg
+├─ tailwind.config.ts
+├─ tsconfig.json
+├─ types
+│  └─ index.ts
+└─ utils
+   └─ storage.ts
 
-📦components
-┣ 📂Board
-┃ ┣ 📜BoardContainer.tsx
-┃ ┣ 📜BoardList.tsx
-┃ ┣ 📜CreateBoardForm.tsx
-┃ ┗ 📜SortableBoardItem.tsx
-┣ 📂Task
-┃ ┣ 📜AddTaskForm.tsx
-┃ ┣ 📜TaskItem.tsx
-┃ ┗ 📜TaskList.tsx
-┗ 📜SaveButton.tsx
-
-📦types
-┗ 📜index.ts
-
-📦utils
-┗ 📜storage.ts
+```
