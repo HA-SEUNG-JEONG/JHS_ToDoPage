@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## <To-Do 보드>
 
-## Getting Started
+1. 보드를 생성할 수 있어야 합니다.
+2. 보드를 수정할 수 있어야 합니다.
+3. 보드를 삭제할 수 있어야 합니다.
+4. 보드의 순서를 변경할 수 있어야 합니다.
 
-First, run the development server:
+## <To-Do 할일>
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+1. 할 일은, 하나의 텍스트 박스를 가집니다.
+2. 보드 안에서, 할 일을 생성할 수 있어야 합니다.
+3. 보드 안에서, 할 일을 삭제할 수 있어야 합니다.
+4. 보드 안에서, 할 일의 내용을 수정할 수 있어야 합니다.
+5. 할 일의 위치를 변경할 수 있어야 한다. (보드간의 할 일 위치, 보드 내에서의 할 일 위치)
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+# 파일 구조
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+📦app
+┣ 📜favicon.ico
+┣ 📜globals.css
+┣ 📜layout.tsx
+┗ 📜page.tsx
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+📦components
+┣ 📂Board
+┃ ┣ 📜BoardContainer.tsx
+┃ ┣ 📜BoardList.tsx
+┃ ┣ 📜CreateBoardForm.tsx
+┃ ┗ 📜SortableBoardItem.tsx
+┣ 📂Task
+┃ ┣ 📜AddTaskForm.tsx
+┃ ┣ 📜TaskItem.tsx
+┃ ┗ 📜TaskList.tsx
+┗ 📜SaveButton.tsx
 
-## Learn More
+📦types
+┗ 📜index.ts
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+📦utils
+┗ 📜storage.ts
