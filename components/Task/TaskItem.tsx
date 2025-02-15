@@ -59,15 +59,12 @@ export default function TaskItem({
             className="px-3 py-2 bg-white rounded-lg border border-gray-200"
         >
             {isEditing ? (
-                <form
-                    onSubmit={handleSubmit}
-                    className="flex gap-2 items-center w-full"
-                >
+                <form onSubmit={handleSubmit} className="flex gap-2">
                     <input
                         type="text"
                         value={editTitle}
                         onChange={(e) => setEditTitle(e.target.value)}
-                        className="flex-1 px-2 py-1 text-sm border rounded-lg text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="flex-1 px-2 py-1 border rounded text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                         autoFocus
                         maxLength={100}
                     />
