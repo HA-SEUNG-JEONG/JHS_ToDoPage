@@ -38,8 +38,7 @@ export default function BoardList({ boards, boardActions }: Props) {
     const moveTaskBetweenBoard = (active: Active, over: Over) => {
         const { id } = active;
         const sourceBoardId: string = active.data.current?.boardId;
-        const targetBoardId: string = over.data.current?.boardId;
-
+        const targetBoardId: string = over.data.current?.boardId || over.id;
         if (sourceBoardId !== targetBoardId) {
             boardActions.moveTaskBetweenBoards(
                 id,
@@ -96,8 +95,9 @@ export default function BoardList({ boards, boardActions }: Props) {
             moveTaskInBoard(active, over);
         }
         // 보드 순서 변경
-        else if (active.data.current?.type === "Board")
+        else if (active.data.current?.type === "Board") {
             moveBoard(active.id, over.id);
+        }
     };
 
     if (boards.length === 0) {
