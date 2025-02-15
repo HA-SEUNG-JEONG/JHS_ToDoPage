@@ -12,14 +12,14 @@ export interface Board {
 }
 
 export interface BoardAction {
-    editBoard: (id: string, title: string) => void;
+    editBoardTitle: (id: string, title: string) => void;
     deleteBoard: (id: string) => void;
     reorderBoards: (boards: Board[]) => void;
     addTask: (boardId: string, content: string) => void;
     editTask: (boardId: string, taskId: string, content: string) => void;
     deleteTask: (boardId: string, taskId: string) => void;
-    reorderTask: (boardId: string, tasks: Task[]) => void;
-    moveTask: (
+    reorderTaskInBoard: (boardId: string, tasks: Task[]) => void;
+    moveTaskBetweenBoards: (
         taskId: string,
         sourceBoardId: string,
         targetBoardId: string

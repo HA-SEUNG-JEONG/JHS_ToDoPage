@@ -21,7 +21,11 @@ export default function BoardList({ boards, boardActions }: Props) {
             const targetBoardId = over.data.current?.boardId || over.id;
 
             if (sourceBoardId !== targetBoardId) {
-                boardActions.moveTask(taskId, sourceBoardId, targetBoardId);
+                boardActions.moveTaskBetweenBoards(
+                    taskId,
+                    sourceBoardId,
+                    targetBoardId
+                );
                 return;
             }
 
@@ -39,7 +43,7 @@ export default function BoardList({ boards, boardActions }: Props) {
                         oldIndex,
                         newIndex
                     );
-                    boardActions.reorderTask(sourceBoardId, newTasks);
+                    boardActions.reorderTaskInBoard(sourceBoardId, newTasks);
                 }
             }
         }

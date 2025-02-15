@@ -19,7 +19,7 @@ export default function BoardContainer() {
         setBoards(savedBoards);
     }, []);
 
-    const handleCreateBoard = (title: string) => {
+    const createBoard = (title: string) => {
         const newBoard: Board = {
             id: crypto.randomUUID(),
             title,
@@ -30,7 +30,7 @@ export default function BoardContainer() {
         saveBoardInStorage(updatedBoards);
     };
 
-    const editBoard = (id: string, newTitle: string) => {
+    const editBoardTitle = (id: string, newTitle: string) => {
         const updatedBoards = boards.map((board) =>
             board.id === id ? { ...board, title: newTitle } : board
         );
@@ -53,17 +53,8 @@ export default function BoardContainer() {
                 const currentTasks = Array.isArray(board.tasks)
                     ? board.tasks
                     : [];
-                return {
-                    ...board,
-                    tasks: [
-                        ...currentTasks,
-                        {
-                            id: crypto.randomUUID(),
-                            title,
-                            boardId
-                        }
-                    ]
-                };
+                const newTask = { id: crypto.randomUUID(), title, boardId };
+                return { ...board, tasks: [...currentTasks, newTask] };
             }
             return board;
         });
@@ -88,10 +79,10 @@ export default function BoardContainer() {
     const deleteTask = (boardId: string, taskId: string) => {
         const updatedBoards = boards.map((board) => {
             if (board.id === boardId) {
-                return {
-                    ...board,
-                    tasks: board.tasks.filter((task) => task.id !== taskId)
-                };
+                const filteredTasks = board.tasks.filter(
+                    (task) => task.id !== taskId
+                );
+                return { ...board, tasks: filteredTasks };
             }
             return board;
         });
@@ -99,13 +90,10 @@ export default function BoardContainer() {
         saveBoardInStorage(updatedBoards);
     };
 
-    const reorderTask = (boardId: string, tasks: Task[]) => {
+    const reorderTaskInBoard = (boardId: string, tasks: Task[]) => {
         const updatedBoards = boards.map((board) => {
             if (board.id === boardId) {
-                return {
-                    ...board,
-                    tasks: [...tasks]
-                };
+                return { ...board, tasks };
             }
             return board;
         });
@@ -113,29 +101,30 @@ export default function BoardContainer() {
         saveBoardInStorage(updatedBoards);
     };
 
-    const moveTask = (
+    const moveTaskBetweenBoards = (
         taskId: string,
         sourceBoardId: string,
         targetBoardId: string
     ) => {
-        const updatedBoards = boards.map((board) => {
-            if (board.id === sourceBoardId) {
-                return {
-                    ...board,
-                    tasks: board.tasks.filter((t) => t.id !== taskId)
-                };
-            }
-            if (board.id === targetBoardId) {
-                const taskToMove = boards
-                    .find((b) => b.id === sourceBoardId)
-                    ?.tasks.find((t) => t.id === taskId);
+        const sourceBoard = boards.find((board) => board.id === sourceBoardId);
+        const targetBoard = boards.find((board) => board.id === targetBoardId);
+        if (!sourceBoard || !targetBoard) return;
 
-                if (taskToMove) {
-                    return {
-                        ...board,
-                        tasks: [...(board.tasks || []), { ...taskToMove }]
-                    };
-                }
+        const taskToMove = sourceBoard.tasks.find((task) => task.id === taskId);
+        if (!taskToMove) return;
+
+        const updatedSourceTasks = sourceBoard.tasks.filter(
+            (task) => task.id !== taskId
+        );
+
+        const updatedTargetTasks = [...targetBoard.tasks, { ...taskToMove }];
+
+        const updatedBoards = boards.map((board) => {
+            if (board.id === sourceBoardId)
+                return { ...board, tasks: updatedSourceTasks };
+
+            if (board.id === targetBoardId) {
+                return { ...board, tasks: updatedTargetTasks };
             }
             return board;
         });
@@ -144,19 +133,19 @@ export default function BoardContainer() {
     };
 
     const boardActions = {
-        editBoard,
+        editBoardTitle,
         deleteBoard,
         reorderBoards,
         addTask,
         editTask,
         deleteTask,
-        reorderTask,
-        moveTask
+        reorderTaskInBoard,
+        moveTaskBetweenBoards
     };
 
     return (
         <div className="p-6">
-            <CreateBoardForm onSubmit={handleCreateBoard} />
+            <CreateBoardForm onSubmit={createBoard} />
             <BoardList boards={boards} boardActions={boardActions} />
         </div>
     );
