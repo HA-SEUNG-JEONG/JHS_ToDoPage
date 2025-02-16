@@ -49,15 +49,20 @@ export default function BoardContainer() {
     };
 
     const addTask = (boardId: string, title: string) => {
+        const newTask = {
+            id: crypto.randomUUID(),
+            title,
+            boardId
+        };
+
         const updatedBoards = boards.map((board) => {
-            if (board.id === boardId) {
-                const currentTasks = Array.isArray(board.tasks)
-                    ? board.tasks
-                    : [];
-                const newTask = { id: crypto.randomUUID(), title, boardId };
-                return { ...board, tasks: [...currentTasks, newTask] };
-            }
-            return board;
+            if (board.id !== boardId) return board;
+
+            const tasks = Array.isArray(board.tasks) ? board.tasks : [];
+            return {
+                ...board,
+                tasks: [...tasks, newTask]
+            };
         });
 
         saveBoardInStorage(updatedBoards);
@@ -65,13 +70,13 @@ export default function BoardContainer() {
 
     const editTask = (boardId: string, taskId: string, newTitle: string) => {
         const updatedBoards = boards.map((board) => {
-            if (board.id === boardId) {
-                const updatedTasks = board.tasks.map((task) =>
-                    task.id === taskId ? { ...task, title: newTitle } : task
-                );
-                return { ...board, tasks: updatedTasks };
-            }
-            return board;
+            if (board.id !== boardId) return board;
+
+            const updatedTasks = board.tasks.map((task) =>
+                task.id === taskId ? { ...task, title: newTitle } : task
+            );
+
+            return { ...board, tasks: updatedTasks };
         });
 
         saveBoardInStorage(updatedBoards);
@@ -114,21 +119,20 @@ export default function BoardContainer() {
         const taskToMove = sourceBoard.tasks.find((task) => task.id === taskId);
         if (!taskToMove) return;
 
-        const updatedSourceTasks = sourceBoard.tasks.filter(
-            (task) => task.id !== taskId
-        );
-
-        const updatedTargetTasks = [...targetBoard.tasks, { ...taskToMove }];
-
-        const updatedBoards = boards.map((board) => {
-            if (board.id === sourceBoardId)
-                return { ...board, tasks: updatedSourceTasks };
-
-            if (board.id === targetBoardId) {
-                return { ...board, tasks: updatedTargetTasks };
+        const updateBoard = {
+            [sourceBoardId]: {
+                tasks: sourceBoard.tasks.filter((task) => task.id !== taskId)
+            },
+            [targetBoardId]: {
+                tasks: [...targetBoard.tasks, { ...taskToMove }]
             }
-            return board;
-        });
+        };
+
+        const updatedBoards = boards.map((board) =>
+            updateBoard[board.id]
+                ? { ...board, ...updateBoard[board.id] }
+                : board
+        );
 
         saveBoardInStorage(updatedBoards);
     };
