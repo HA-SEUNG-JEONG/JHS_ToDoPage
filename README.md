@@ -16,7 +16,6 @@
 # 파일 구조
 
 ```
-kanban_todolist
 ├─ README.md
 ├─ app
 │  ├─ favicon.ico
@@ -49,5 +48,4 @@ kanban_todolist
 │  └─ index.ts
 └─ utils
    └─ storage.ts
-
 ```
