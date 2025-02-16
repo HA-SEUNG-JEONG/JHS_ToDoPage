@@ -2,6 +2,8 @@ import {
     Active,
     DndContext,
     DragEndEvent,
+    DragOverlay,
+    DragStartEvent,
     MouseSensor,
     Over,
     TouchSensor,
@@ -11,9 +13,10 @@ import {
     useSensors
 } from "@dnd-kit/core";
 import { SortableContext, arrayMove } from "@dnd-kit/sortable";
-import { Board, BoardAction } from "@/types";
+import { Board, BoardAction, Task } from "@/types";
 import SortableBoardItem from "./SortableBoardItem";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
+import { useState } from "react";
 
 type Props = {
     boards: Board[];
@@ -21,6 +24,8 @@ type Props = {
 };
 
 export default function BoardList({ boards, boardActions }: Props) {
+    const [activeId, setActiveId] = useState<Task | null>(null);
+
     const sensors = useSensors(
         useSensor(MouseSensor, {
             activationConstraint: {
@@ -83,6 +88,12 @@ export default function BoardList({ boards, boardActions }: Props) {
         boardActions.reorderBoards(arrayMove(boards, oldIndex, newIndex));
     };
 
+    const handleDragStart = (event: DragStartEvent) => {
+        if (event.active.data.current?.type === "Task") {
+            setActiveId(event.active.data.current.task);
+        }
+    };
+
     const handleDragEnd = (event: DragEndEvent) => {
         const { active, over } = event;
         if (!over) return;
@@ -98,6 +109,7 @@ export default function BoardList({ boards, boardActions }: Props) {
         else if (active.data.current?.type === "Board") {
             moveBoard(active.id, over.id);
         }
+        setActiveId(null);
     };
 
     if (boards.length === 0) {
@@ -111,6 +123,7 @@ export default function BoardList({ boards, boardActions }: Props) {
     return (
         <DndContext
             collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
             modifiers={[restrictToWindowEdges]}
             sensors={sensors}
@@ -126,6 +139,13 @@ export default function BoardList({ boards, boardActions }: Props) {
                     ))}
                 </div>
             </SortableContext>
+            <DragOverlay>
+                {activeId ? (
+                    <div className="bg-blue-300 p-4 text-white rounded shadow-lg z-[999]">
+                        {activeId.title}
+                    </div>
+                ) : null}
+            </DragOverlay>
         </DndContext>
     );
 }
