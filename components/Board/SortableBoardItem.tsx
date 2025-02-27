@@ -1,5 +1,5 @@
 import { Board, BoardAction } from "@/types";
-import { useState } from "react";
+import { useState, useRef } from "react";
 import TaskList from "../Task/TaskList";
 import AddTaskForm from "../Task/AddTaskForm";
 
@@ -15,6 +15,7 @@ export default function SortableBoardItem({
     const { title, id, tasks } = board;
     const [isEditing, setIsEditing] = useState(false);
     const [editTitle, setEditTitle] = useState(title);
+    const draggedItemRef = useRef<HTMLDivElement | null>(null);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -35,8 +36,35 @@ export default function SortableBoardItem({
         }
     };
 
+    const handleTouchStart = (e: React.TouchEvent) => {
+        const touch = e.touches[0];
+        if (draggedItemRef.current) {
+            draggedItemRef.current.style.transition = "none";
+            draggedItemRef.current.style.transform = `translate(${touch.clientX}px, ${touch.clientY}px)`;
+        }
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        if (!draggedItemRef.current) return;
+        const touch = e.touches[0];
+        draggedItemRef.current.style.transform = `translate(${touch.clientX}px, ${touch.clientY}px)`;
+    };
+
+    const handleTouchEnd = () => {
+        if (draggedItemRef.current) {
+            draggedItemRef.current.style.opacity = "1";
+            draggedItemRef.current.style.transform = "none";
+        }
+        draggedItemRef.current = null;
+    };
+
     return (
-        <div className="p-4 bg-white rounded-lg shadow-md transition-all duration-200">
+        <div
+            className="p-4 bg-white rounded-lg shadow-md transition-all duration-200"
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+        >
             <div className="flex items-center justify-between mb-4">
                 {isEditing ? (
                     <form
