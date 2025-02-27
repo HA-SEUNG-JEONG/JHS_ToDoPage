@@ -109,7 +109,8 @@ export default function BoardContainer() {
     const moveTaskBetweenBoards = (
         taskId: string,
         sourceBoardId: string,
-        targetBoardId: string
+        targetBoardId: string,
+        tasks: Task[]
     ) => {
         const sourceBoard = boards.find((board) => board.id === sourceBoardId);
         const targetBoard = boards.find((board) => board.id === targetBoardId);
@@ -122,9 +123,7 @@ export default function BoardContainer() {
             [sourceBoardId]: {
                 tasks: sourceBoard.tasks.filter((task) => task.id !== taskId)
             },
-            [targetBoardId]: {
-                tasks: [...targetBoard.tasks, { ...taskToMove }]
-            }
+            [targetBoardId]: { tasks }
         };
 
         const updatedBoards = boards.map((board) =>
