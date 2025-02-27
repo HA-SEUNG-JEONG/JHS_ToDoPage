@@ -147,7 +147,7 @@ export default function BoardContainer() {
     };
 
     return (
-        <div className="p-6">
+        <div className="p-6 select-none">
             <CreateBoardForm onSubmit={createBoard} />
             <BoardList boards={boards} boardActions={boardActions} />
         </div>
