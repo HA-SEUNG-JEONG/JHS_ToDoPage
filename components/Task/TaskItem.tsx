@@ -34,14 +34,14 @@ export default function TaskItem({
     };
 
     return (
-        <div className="group relative flex items-center justify-between p-2 bg-white rounded-lg">
+        <div className="group relative flex justify-start items-center p-2 rounded-lg">
             {isEditing ? (
-                <form onSubmit={handleSubmit} className="flex-1 flex gap-2">
+                <form onSubmit={handleSubmit} className="flex gap-2">
                     <input
                         type="text"
                         value={editTitle}
                         onChange={(e) => setEditTitle(e.target.value)}
-                        className="flex-1 px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="flex-1 px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
                         autoFocus
                     />
                     <button
