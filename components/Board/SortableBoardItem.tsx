@@ -60,7 +60,7 @@ export default function SortableBoardItem({
 
     return (
         <div
-            className="p-4 bg-white rounded-lg shadow-md transition-all duration-200"
+            className="p-4 bg-white rounded-lg shadow-md transition-all duration-200 touch-none"
             onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
@@ -97,8 +97,8 @@ export default function SortableBoardItem({
                     </form>
                 ) : (
                     <>
-                        <div className="cursor-grab flex-1">
-                            <h3 className="text-lg font-semibold text-black select-none pointer-events-auto">
+                        <div className="cursor-grab flex-1 select-none">
+                            <h3 className="text-lg font-semibold text-black">
                                 {board.title}
                             </h3>
                         </div>
