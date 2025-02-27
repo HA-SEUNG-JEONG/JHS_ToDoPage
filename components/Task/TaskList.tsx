@@ -16,42 +16,64 @@ export default function TaskList({
     const [draggedTask, setDraggedTask] = useState<Task | null>(null);
     const [dropTargetId, setDropTargetId] = useState<string | null>(null);
     const draggedTaskRef = useRef<HTMLDivElement | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
 
     const handleTouchStart = (
         e: React.TouchEvent<HTMLDivElement>,
         task: Task
     ) => {
         e.preventDefault();
+        const touch = e.touches[0];
         setDraggedTask(task);
+        setIsDragging(true);
+
+        if (draggedTaskRef.current) {
+            draggedTaskRef.current.style.transition = "none";
+            draggedTaskRef.current.style.zIndex = "50";
+            draggedTaskRef.current.style.position = "relative";
+            draggedTaskRef.current.style.backgroundColor = "white";
+        }
     };
 
     const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
         e.preventDefault();
-        if (!draggedTask) return;
+        if (!draggedTask || !draggedTaskRef.current) return;
 
         const touch = e.touches[0];
+        const deltaX = touch.clientX - touch.clientX;
+        const deltaY = touch.clientY - touch.clientY;
+
+        draggedTaskRef.current.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
+
+        // 드롭 대상 찾기
         const elements = document.elementsFromPoint(
             touch.clientX,
             touch.clientY
         );
-
         const targetTask = elements.find((el) => {
             const taskId = el.getAttribute("data-task-id");
             return taskId && taskId !== draggedTask.id;
         });
 
         if (targetTask) {
-            setDropTargetId(targetTask.getAttribute("data-task-id") || null);
+            const taskId = targetTask.getAttribute("data-task-id");
+            setDropTargetId(taskId);
+        } else {
+            setDropTargetId(null);
         }
     };
 
     const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
         e.preventDefault();
-        if (!draggedTask) return;
+        if (!draggedTask || !isDragging) return;
+
+        setIsDragging(false);
 
         if (draggedTaskRef.current) {
-            draggedTaskRef.current.style.opacity = "1";
+            draggedTaskRef.current.style.transition = "transform 0.2s ease-out";
             draggedTaskRef.current.style.transform = "none";
+            draggedTaskRef.current.style.zIndex = "auto";
+            draggedTaskRef.current.style.position = "static";
             draggedTaskRef.current.style.backgroundColor = "transparent";
         }
 
@@ -66,6 +88,9 @@ export default function TaskList({
                 boardActions.reorderTaskInBoard(boardId, newTasks);
             }
         }
+
+        setDraggedTask(null);
+        setDropTargetId(null);
     };
 
     const handleTouchCancel = (e: React.TouchEvent<HTMLDivElement>) => {
@@ -205,6 +230,7 @@ export default function TaskList({
             {tasks.map((task) => (
                 <div
                     key={task.id}
+                    data-task-id={task.id}
                     draggable
                     onDragStart={(e) => handleTaskDragStart(e, task)}
                     onDragEnd={handleTaskDragEnd}
@@ -216,7 +242,14 @@ export default function TaskList({
                     onTouchEnd={handleTouchEnd}
                     onTouchCancel={handleTouchCancel}
                     ref={draggedTask?.id === task.id ? draggedTaskRef : null}
-                    className="rounded-lg shadow-sm cursor-grab transition-all dragging:opacity-50"
+                    className="rounded-lg shadow-sm cursor-grab transition-all dragging:opacity-50 touch-none"
+                    style={{
+                        touchAction: "none",
+                        userSelect: "none",
+                        WebkitUserSelect: "none",
+                        position: isDragging ? "relative" : "static",
+                        zIndex: isDragging ? 50 : "auto"
+                    }}
                 >
                     {dropTargetId === task.id &&
                         draggedTask?.id !== task.id && (
