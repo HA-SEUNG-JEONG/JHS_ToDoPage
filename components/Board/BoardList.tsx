@@ -12,75 +12,6 @@ export default function BoardList({ boards, boardActions }: Props) {
     const [dropTargetId, setDropTargetId] = useState<string | null>(null);
     const draggedBoardRef = useRef<HTMLDivElement | null>(null);
 
-    const handleTouchStart = (e: React.TouchEvent, board: Board) => {
-        e.preventDefault(); // 스크롤 방지
-        setDraggedBoard(board);
-        if (draggedBoardRef.current) {
-            draggedBoardRef.current.style.opacity = "0.5";
-            draggedBoardRef.current.style.transform = "scale(1.05)";
-        }
-    };
-
-    const handleTouchMove = (e: React.TouchEvent) => {
-        e.preventDefault();
-        if (!draggedBoard) return;
-
-        const touch = e.touches[0];
-        const elements = document.elementsFromPoint(
-            touch.clientX,
-            touch.clientY
-        );
-
-        // 현재 터치 위치 아래에 있는 다른 보드 찾기
-        const targetBoard = elements.find((el) => {
-            const boardId = el.getAttribute("data-board-id");
-            return boardId && boardId !== draggedBoard.id;
-        });
-
-        if (targetBoard) {
-            setDropTargetId(targetBoard.getAttribute("data-board-id") || null);
-        }
-    };
-
-    const handleTouchEnd = (e: React.TouchEvent) => {
-        e.preventDefault();
-        if (!draggedBoard) return;
-
-        if (draggedBoardRef.current) {
-            draggedBoardRef.current.style.opacity = "1";
-            draggedBoardRef.current.style.transform = "none";
-        }
-
-        if (dropTargetId) {
-            const oldIndex = boards.findIndex(
-                (board) => board.id === draggedBoard.id
-            );
-            const newIndex = boards.findIndex(
-                (board) => board.id === dropTargetId
-            );
-
-            if (oldIndex !== newIndex) {
-                const newBoards = [...boards];
-                newBoards.splice(oldIndex, 1);
-                newBoards.splice(newIndex, 0, draggedBoard);
-                boardActions.reorderBoards(newBoards);
-            }
-        }
-
-        setDraggedBoard(null);
-        setDropTargetId(null);
-    };
-
-    const handleTouchCancel = (e: React.TouchEvent) => {
-        e.preventDefault();
-        if (draggedBoardRef.current) {
-            draggedBoardRef.current.style.opacity = "1";
-            draggedBoardRef.current.style.transform = "none";
-        }
-        setDraggedBoard(null);
-        setDropTargetId(null);
-    };
-
     const handleDragStart = (
         e: React.DragEvent<HTMLDivElement>,
         board: Board
@@ -162,10 +93,6 @@ export default function BoardList({ boards, boardActions }: Props) {
                     onDragOver={(e) => handleDragOver(e, board)}
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(e, board)}
-                    onTouchStart={(e) => handleTouchStart(e, board)}
-                    onTouchMove={handleTouchMove}
-                    onTouchEnd={handleTouchEnd}
-                    onTouchCancel={handleTouchCancel}
                     ref={draggedBoard?.id === board.id ? draggedBoardRef : null}
                     className={`relative ${
                         dropTargetId === board.id ? "ring-2 ring-blue-400" : ""

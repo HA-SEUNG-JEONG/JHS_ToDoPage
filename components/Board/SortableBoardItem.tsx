@@ -16,8 +16,6 @@ export default function SortableBoardItem({
     const [isEditing, setIsEditing] = useState(false);
     const [editTitle, setEditTitle] = useState(title);
     const draggedItemRef = useRef<HTMLDivElement | null>(null);
-    const [touchStart, setTouchStart] = useState({ x: 0, y: 0 });
-    const [isDragging, setIsDragging] = useState(false);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
@@ -38,48 +36,10 @@ export default function SortableBoardItem({
         }
     };
 
-    const handleTouchStart = (e: React.TouchEvent) => {
-        const touch = e.touches[0];
-        setTouchStart({ x: touch.clientX, y: touch.clientY });
-        setIsDragging(true);
-
-        if (draggedItemRef.current) {
-            draggedItemRef.current.style.transition = "none";
-            draggedItemRef.current.style.zIndex = "50";
-            draggedItemRef.current.style.position = "relative";
-        }
-    };
-
-    const handleTouchMove = (e: React.TouchEvent) => {
-        if (!isDragging || !draggedItemRef.current) return;
-
-        const touch = e.touches[0];
-        const deltaX = touch.clientX - touchStart.x;
-        const deltaY = touch.clientY - touchStart.y;
-
-        draggedItemRef.current.style.transform = `translate(${deltaX}px, ${deltaY}px)`;
-    };
-
-    const handleTouchEnd = () => {
-        setIsDragging(false);
-
-        if (draggedItemRef.current) {
-            draggedItemRef.current.style.transition = "transform 0.2s ease-out";
-            draggedItemRef.current.style.transform = "none";
-            draggedItemRef.current.style.zIndex = "auto";
-            draggedItemRef.current.style.position = "static";
-        }
-    };
-
     return (
         <div
             ref={draggedItemRef}
-            className={`p-4 bg-white rounded-lg shadow-md transition-all duration-200 touch-none select-none ${
-                isDragging ? "relative z-50" : "static z-auto"
-            }`}
-            onTouchStart={handleTouchStart}
-            onTouchMove={handleTouchMove}
-            onTouchEnd={handleTouchEnd}
+            className="p-4 bg-white rounded-lg shadow-md transition-all duration-200"
         >
             <div className="flex items-center justify-between mb-4">
                 {isEditing ? (
