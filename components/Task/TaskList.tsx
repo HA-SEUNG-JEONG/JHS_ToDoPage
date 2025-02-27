@@ -23,7 +23,6 @@ export default function TaskList({
         task: Task
     ) => {
         e.preventDefault();
-        const touch = e.touches[0];
         setDraggedTask(task);
         setIsDragging(true);
 
