@@ -17,9 +17,12 @@ export default function TaskList({
     const [dropTargetId, setDropTargetId] = useState<string | null>(null);
     const draggedTaskRef = useRef<HTMLDivElement | null>(null);
 
-    const handleTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    const handleTouchStart = (
+        e: React.TouchEvent<HTMLDivElement>,
+        task: Task
+    ) => {
         e.preventDefault();
-        setDraggedTask(null);
+        setDraggedTask(task);
     };
 
     const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
@@ -49,6 +52,7 @@ export default function TaskList({
         if (draggedTaskRef.current) {
             draggedTaskRef.current.style.opacity = "1";
             draggedTaskRef.current.style.transform = "none";
+            draggedTaskRef.current.style.backgroundColor = "transparent";
         }
 
         if (dropTargetId) {
@@ -207,12 +211,12 @@ export default function TaskList({
                     onDragOver={(e) => handleTaskDragOver(e, task)}
                     onDragLeave={handleTaskDragLeave}
                     onDrop={(e) => handleTaskDrop(e, task)}
-                    onTouchStart={handleTouchStart}
+                    onTouchStart={(e) => handleTouchStart(e, task)}
                     onTouchMove={handleTouchMove}
                     onTouchEnd={handleTouchEnd}
                     onTouchCancel={handleTouchCancel}
                     ref={draggedTask?.id === task.id ? draggedTaskRef : null}
-                    className="rounded-lg shadow-sm cursor-grab transition-all dragging:opacity-50 before:content-['drop here'] before:border-dashed"
+                    className="rounded-lg shadow-sm cursor-grab transition-all dragging:opacity-50"
                 >
                     {dropTargetId === task.id &&
                         draggedTask?.id !== task.id && (
