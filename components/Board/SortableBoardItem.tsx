@@ -70,7 +70,7 @@ export default function SortableBoardItem({
                 ) : (
                     <>
                         <div className="cursor-grab flex-1">
-                            <h3 className="text-lg font-semibold text-black select-none">
+                            <h3 className="text-lg font-semibold text-black select-none pointer-events-auto">
                                 {board.title}
                             </h3>
                         </div>
