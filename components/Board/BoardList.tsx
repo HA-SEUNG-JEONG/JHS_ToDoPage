@@ -16,9 +16,6 @@ export default function BoardList({ boards, boardActions }: Props) {
         board: Board
     ) => {
         setDraggedBoard(board);
-        if (draggedBoardRef.current) {
-            draggedBoardRef.current.style.opacity = "0.5";
-        }
         e.dataTransfer.effectAllowed = "move";
     };
 
