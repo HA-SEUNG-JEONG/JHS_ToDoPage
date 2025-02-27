@@ -152,7 +152,7 @@ export default function BoardList({ boards, boardActions }: Props) {
     }
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 select-none">
             {boards.map((board) => (
                 <div
                     key={board.id}
