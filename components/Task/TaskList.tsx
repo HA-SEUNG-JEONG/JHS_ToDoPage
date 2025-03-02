@@ -15,7 +15,6 @@ export default function TaskList({
 }: TaskListProps) {
     const [draggedTask, setDraggedTask] = useState<Task | null>(null);
     const [dropTargetId, setDropTargetId] = useState<string | null>(null);
-    const [isOverEmptySpace, setIsOverEmptySpace] = useState(false);
 
     const draggedTaskRef = useRef<HTMLDivElement | null>(null);
 
@@ -56,13 +55,11 @@ export default function TaskList({
         e.preventDefault();
         e.stopPropagation();
         e.dataTransfer.dropEffect = "move";
-        setIsOverEmptySpace(true);
     };
 
     const handleTaskDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         e.stopPropagation();
-        setIsOverEmptySpace(false);
     };
 
     const handleTaskDrop = (
@@ -71,7 +68,6 @@ export default function TaskList({
     ) => {
         e.preventDefault();
         e.stopPropagation();
-        setIsOverEmptySpace(false);
         try {
             const data = JSON.parse(e.dataTransfer.getData("application/json"));
             const { taskId, sourceBoardId, task } = data;
@@ -112,11 +108,7 @@ export default function TaskList({
 
     return (
         <div
-            className={`space-y-2 min-h-[100px] p-2 select-none relative ${
-                isOverEmptySpace && tasks.length === 0
-                    ? "border-2 border-dashed border-blue-400 rounded-lg bg-blue-50"
-                    : ""
-            }`}
+            className={`space-y-2 min-h-[100px] p-2 select-none relative`}
             onDragOver={(e) => handleTaskDragOver(e)}
             onDragLeave={handleTaskDragLeave}
             onDrop={(e) => handleTaskDrop(e, null)}
@@ -145,11 +137,6 @@ export default function TaskList({
                     />
                 </div>
             ))}
-            {isOverEmptySpace && (
-                <div className="absolute inset-0 flex items-center justify-center text-blue-500 pointer-events-none bg-blue-50 rounded-lg">
-                    여기에 드롭하세요
-                </div>
-            )}
         </div>
     );
 }
