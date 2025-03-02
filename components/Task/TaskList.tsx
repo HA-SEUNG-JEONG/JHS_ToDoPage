@@ -14,7 +14,10 @@ export default function TaskList({
     boardActions
 }: TaskListProps) {
     const [draggedTask, setDraggedTask] = useState<Task | null>(null);
-    const [dropTargetId, setDropTargetId] = useState<string | null>(null);
+    const [dropPosition, setDropPosition] = useState<{
+        taskId: string | undefined;
+        position: "before" | "after";
+    } | null>(null);
 
     const draggedTaskRef = useRef<HTMLDivElement | null>(null);
 
@@ -44,22 +47,31 @@ export default function TaskList({
             draggedTaskRef.current.style.opacity = "1";
         }
         setDraggedTask(null);
-        setDropTargetId(null);
 
         if (e.dataTransfer.dropEffect === "none") {
             console.log("태스크 드래그 앤 드롭 실패");
         }
     };
 
-    const handleTaskDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    const handleTaskDragOver = (
+        e: React.DragEvent<HTMLDivElement>,
+        task?: Task
+    ) => {
         e.preventDefault();
         e.stopPropagation();
-        e.dataTransfer.dropEffect = "move";
+        // e.dataTransfer.dropEffect = "move";
+        const rect = e.currentTarget.getBoundingClientRect();
+        const y = e.clientY - rect.top;
+        const position = y < rect.height / 2 ? "before" : "after";
+        if (draggedTask?.id !== task?.id) {
+            setDropPosition({ taskId: task?.id, position });
+        }
     };
 
     const handleTaskDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         e.stopPropagation();
+        setDropPosition(null);
     };
 
     const handleTaskDrop = (
@@ -103,7 +115,6 @@ export default function TaskList({
         } catch (error) {
             console.error("태스크 드롭 처리 중 오류 발생:", error);
         }
-        // setIsOverEmptySpace(false);
     };
 
     return (
@@ -111,7 +122,10 @@ export default function TaskList({
             className={`space-y-2 min-h-[100px] p-2 select-none relative`}
             onDragOver={(e) => handleTaskDragOver(e)}
             onDragLeave={handleTaskDragLeave}
-            onDrop={(e) => handleTaskDrop(e, null)}
+            onDrop={(e) => {
+                handleTaskDrop(e, null);
+                setDropPosition(null);
+            }}
         >
             {tasks.map((task) => (
                 <div
@@ -119,22 +133,63 @@ export default function TaskList({
                     data-task-id={task.id}
                     draggable
                     onDragStart={(e) => handleTaskDragStart(e, task)}
-                    onDragEnd={handleTaskDragEnd}
-                    onDragOver={(e) => handleTaskDragOver(e)}
+                    onDragEnd={(e) => {
+                        handleTaskDragEnd(e);
+                        setDropPosition(null);
+                    }}
+                    onDragOver={(e) => handleTaskDragOver(e, task)}
                     onDragLeave={handleTaskDragLeave}
-                    onDrop={(e) => handleTaskDrop(e, task)}
+                    onDrop={(e) => {
+                        handleTaskDrop(e, task);
+                        setDropPosition(null);
+                    }}
                     ref={draggedTask?.id === task.id ? draggedTaskRef : null}
-                    className={`relative rounded-lg shadow-sm cursor-grab transition-all ${
-                        dropTargetId === task.id
-                            ? "ring-2 ring-blue-400 border-dashed"
-                            : ""
-                    }`}
+                    className={`
+                        relative rounded-lg shadow-sm bg-white
+                        transition-all ease-in-out
+                        ${draggedTask?.id === task.id ? "opacity-30" : ""}
+                        ${
+                            dropPosition?.taskId === task.id
+                                ? "border-2 border-dashed border-blue-500"
+                                : ""
+                        }
+                        ${
+                            dropPosition?.taskId === task.id &&
+                            dropPosition.position === "before"
+                                ? "mb-8"
+                                : "mb-2"
+                        }
+                        ${
+                            dropPosition?.taskId === task.id &&
+                            dropPosition.position === "after"
+                                ? "mt-8"
+                                : "mt-2"
+                        }
+                        hover:cursor-grab active:cursor-grabbing
+                    `}
                 >
-                    <TaskItem
-                        task={task}
-                        boardId={boardId}
-                        boardActions={boardActions}
-                    />
+                    {dropPosition?.taskId === task.id && (
+                        <div
+                            className={`
+                                absolute left-0 right-0
+                                ${
+                                    dropPosition.position === "before"
+                                        ? "-top-4"
+                                        : "-bottom-4"
+                                }
+
+                                rounded-md
+
+                            `}
+                        />
+                    )}
+                    <div className="relative z-10 bg-white rounded-lg">
+                        <TaskItem
+                            task={task}
+                            boardId={boardId}
+                            boardActions={boardActions}
+                        />
+                    </div>
                 </div>
             ))}
         </div>
