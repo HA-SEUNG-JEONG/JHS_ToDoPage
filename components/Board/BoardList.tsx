@@ -9,7 +9,7 @@ type Props = {
 
 export default function BoardList({ boards, boardActions }: Props) {
     const [draggedBoard, setDraggedBoard] = useState<Board | null>(null);
-    const [dropTargetId, setDropTargetId] = useState<string | null>(null);
+
     const draggedBoardRef = useRef<HTMLDivElement | null>(null);
 
     const handleDragStart = (
@@ -21,41 +21,24 @@ export default function BoardList({ boards, boardActions }: Props) {
         e.dataTransfer.effectAllowed = "move";
     };
 
-    const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
-        e.stopPropagation();
-        if (draggedBoardRef.current) {
-            draggedBoardRef.current.style.opacity = "1";
-        }
-        setDraggedBoard(null);
-        setDropTargetId(null);
-        if (e.dataTransfer.dropEffect === "none") {
-            console.log("드래그 앤 드랍 실패");
-        }
-    };
-
-    const handleDragOver = (
-        e: React.DragEvent<HTMLDivElement>,
-        board: Board
-    ) => {
+    const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         e.stopPropagation();
-        if (draggedBoard?.id !== board.id) {
-            setDropTargetId(board.id);
-        }
+
         e.dataTransfer.dropEffect = "move";
     };
 
     const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         e.stopPropagation();
-        setDropTargetId(null);
     };
 
     const handleDrop = (
         e: React.DragEvent<HTMLDivElement>,
         targetBoard: Board
     ) => {
-        e.preventDefault();
+        e.stopPropagation();
+
         if (!draggedBoard) return;
 
         const oldIndex = boards.findIndex(
@@ -65,12 +48,27 @@ export default function BoardList({ boards, boardActions }: Props) {
             (board) => board.id === targetBoard.id
         );
 
+        if (oldIndex === newIndex) return;
+
         if (oldIndex !== newIndex) {
             const newBoards = [...boards];
             newBoards.splice(oldIndex, 1);
             newBoards.splice(newIndex, 0, draggedBoard);
 
             boardActions.reorderBoards(newBoards);
+        }
+    };
+
+    const handleDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+
+        if (draggedBoardRef.current) {
+            draggedBoardRef.current.style.opacity = "1";
+        }
+        setDraggedBoard(null);
+
+        if (e.dataTransfer.dropEffect === "none") {
+            console.log("드래그 앤 드랍 실패");
         }
     };
 
@@ -90,13 +88,10 @@ export default function BoardList({ boards, boardActions }: Props) {
                     draggable
                     onDragStart={(e) => handleDragStart(e, board)}
                     onDragEnd={handleDragEnd}
-                    onDragOver={(e) => handleDragOver(e, board)}
+                    onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(e, board)}
                     ref={draggedBoard?.id === board.id ? draggedBoardRef : null}
-                    className={`relative ${
-                        dropTargetId === board.id ? "ring-2 ring-blue-400" : ""
-                    }`}
                 >
                     <SortableBoardItem
                         board={board}
