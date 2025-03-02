@@ -15,6 +15,8 @@ export default function TaskList({
 }: TaskListProps) {
     const [draggedTask, setDraggedTask] = useState<Task | null>(null);
     const [dropTargetId, setDropTargetId] = useState<string | null>(null);
+    const [isOverEmptySpace, setIsOverEmptySpace] = useState(false);
+
     const draggedTaskRef = useRef<HTMLDivElement | null>(null);
 
     const handleTaskDragStart = (
@@ -23,9 +25,10 @@ export default function TaskList({
     ) => {
         e.stopPropagation();
         setDraggedTask(task);
-
+        if (draggedTaskRef.current) {
+            draggedTaskRef.current.style.opacity = "0.5";
+        }
         e.dataTransfer.effectAllowed = "move";
-        // 현재 보드 ID와 태스크 정보를 저장
         e.dataTransfer.setData(
             "application/json",
             JSON.stringify({
@@ -38,23 +41,28 @@ export default function TaskList({
 
     const handleTaskDragEnd = (e: React.DragEvent<HTMLDivElement>) => {
         e.stopPropagation();
+        if (draggedTaskRef.current) {
+            draggedTaskRef.current.style.opacity = "1";
+        }
         setDraggedTask(null);
         setDropTargetId(null);
+
         if (e.dataTransfer.dropEffect === "none") {
             console.log("태스크 드래그 앤 드롭 실패");
         }
     };
 
-    const handleTaskDragOver = (
-        e: React.DragEvent<HTMLDivElement>,
-        task: Task | null
-    ) => {
+    const handleTaskDragOver = (e: React.DragEvent<HTMLDivElement>) => {
         e.preventDefault();
         e.stopPropagation();
-        if (draggedTask?.id !== task?.id) {
-            setDropTargetId(task?.id || null);
-        }
         e.dataTransfer.dropEffect = "move";
+        setIsOverEmptySpace(true);
+    };
+
+    const handleTaskDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setIsOverEmptySpace(false);
     };
 
     const handleTaskDrop = (
@@ -62,6 +70,8 @@ export default function TaskList({
         targetTask: Task | null
     ) => {
         e.preventDefault();
+        e.stopPropagation();
+        setIsOverEmptySpace(false);
         try {
             const data = JSON.parse(e.dataTransfer.getData("application/json"));
             const { taskId, sourceBoardId, task } = data;
@@ -69,9 +79,9 @@ export default function TaskList({
             // 같은 보드 내에서의 이동
             if (sourceBoardId === boardId) {
                 const oldIndex = tasks.findIndex((t) => t.id === taskId);
-                const newIndex = tasks.findIndex(
-                    (t) => t.id === targetTask?.id
-                );
+                const newIndex = targetTask
+                    ? tasks.findIndex((t) => t.id === targetTask.id)
+                    : tasks.length;
 
                 if (oldIndex !== newIndex) {
                     const newTasks = [...tasks];
@@ -82,9 +92,9 @@ export default function TaskList({
             }
             // 다른 보드로의 이동
             else {
-                const targetIndex = tasks.findIndex(
-                    (t) => t.id === targetTask?.id
-                );
+                const targetIndex = targetTask
+                    ? tasks.findIndex((t) => t.id === targetTask.id)
+                    : tasks.length;
                 const newTasks = [...tasks];
                 newTasks.splice(targetIndex, 0, task);
                 boardActions.moveTaskBetweenBoards(
@@ -97,50 +107,19 @@ export default function TaskList({
         } catch (error) {
             console.error("태스크 드롭 처리 중 오류 발생:", error);
         }
-    };
-
-    const handleEmptySpaceDrop = (e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        try {
-            const data = JSON.parse(e.dataTransfer.getData("application/json"));
-            const { taskId, sourceBoardId, task } = data;
-
-            // 같은 보드의 빈 공간으로 이동
-            if (sourceBoardId === boardId) {
-                const oldIndex = tasks.findIndex((t) => t.id === taskId);
-                if (oldIndex !== tasks.length - 1) {
-                    const newTasks = [...tasks];
-                    newTasks.splice(oldIndex, 1);
-                    newTasks.push(task);
-                    boardActions.reorderTaskInBoard(boardId, newTasks);
-                }
-            }
-            // 다른 보드의 빈 공간으로 이동
-            else {
-                const newTasks = [...tasks, task];
-                boardActions.moveTaskBetweenBoards(
-                    taskId,
-                    sourceBoardId,
-                    boardId,
-                    newTasks
-                );
-            }
-        } catch (error) {
-            console.error("빈 공간 드롭 처리 중 오류 발생:", error);
-        }
-    };
-
-    const handleTaskDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-        e.preventDefault();
-        e.stopPropagation();
-        setDropTargetId(null);
+        // setIsOverEmptySpace(false);
     };
 
     return (
         <div
-            className="space-y-2 min-h-[100px] p-2 select-none"
-            onDragOver={(e) => handleTaskDragOver(e, null)}
-            onDrop={handleEmptySpaceDrop}
+            className={`space-y-2 min-h-[100px] p-2 select-none relative ${
+                isOverEmptySpace && tasks.length === 0
+                    ? "border-2 border-dashed border-blue-400 rounded-lg bg-blue-50"
+                    : ""
+            }`}
+            onDragOver={(e) => handleTaskDragOver(e)}
+            onDragLeave={handleTaskDragLeave}
+            onDrop={(e) => handleTaskDrop(e, null)}
         >
             {tasks.map((task) => (
                 <div
@@ -149,22 +128,16 @@ export default function TaskList({
                     draggable
                     onDragStart={(e) => handleTaskDragStart(e, task)}
                     onDragEnd={handleTaskDragEnd}
-                    onDragOver={(e) => handleTaskDragOver(e, task)}
+                    onDragOver={(e) => handleTaskDragOver(e)}
                     onDragLeave={handleTaskDragLeave}
                     onDrop={(e) => handleTaskDrop(e, task)}
                     ref={draggedTask?.id === task.id ? draggedTaskRef : null}
-                    className="rounded-lg shadow-sm cursor-grab transition-all dragging:opacity-50"
+                    className={`relative rounded-lg shadow-sm cursor-grab transition-all ${
+                        dropTargetId === task.id
+                            ? "ring-2 ring-blue-400 border-dashed"
+                            : ""
+                    }`}
                 >
-                    {dropTargetId === task.id &&
-                        draggedTask?.id !== task.id && (
-                            <div className="absolute inset-0 bg-blue-100/50 border-2 border-dashed border-blue-400 rounded-lg z-10 pointer-events-none">
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <span className="bg-white px-2 py-0.5 text-sm rounded-full text-blue-500 font-medium shadow-sm">
-                                        여기에 드롭하세요
-                                    </span>
-                                </div>
-                            </div>
-                        )}
                     <TaskItem
                         task={task}
                         boardId={boardId}
@@ -172,6 +145,11 @@ export default function TaskList({
                     />
                 </div>
             ))}
+            {isOverEmptySpace && (
+                <div className="absolute inset-0 flex items-center justify-center text-blue-500 pointer-events-none bg-blue-50 rounded-lg">
+                    여기에 드롭하세요
+                </div>
+            )}
         </div>
     );
 }

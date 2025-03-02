@@ -98,16 +98,6 @@ export default function BoardList({ boards, boardActions }: Props) {
                         dropTargetId === board.id ? "ring-2 ring-blue-400" : ""
                     }`}
                 >
-                    {dropTargetId === board.id &&
-                        draggedBoard?.id !== board.id && (
-                            <div className="absolute inset-0 bg-blue-100/50 border-2 border-dashed border-blue-400 rounded-lg z-10 pointer-events-none">
-                                <div className="absolute inset-0 flex items-center justify-center">
-                                    <span className="bg-white px-3 py-1 rounded-full text-blue-500 font-medium shadow-sm">
-                                        여기에 드롭하세요
-                                    </span>
-                                </div>
-                            </div>
-                        )}
                     <SortableBoardItem
                         board={board}
                         boardActions={boardActions}
