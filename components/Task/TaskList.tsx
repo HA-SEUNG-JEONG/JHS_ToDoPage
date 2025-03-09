@@ -14,12 +14,141 @@ export default function TaskList({
     boardActions
 }: TaskListProps) {
     const [draggedTask, setDraggedTask] = useState<Task | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
     const [dropPosition, setDropPosition] = useState<{
         taskId: string | undefined;
         position: "before" | "after";
     } | null>(null);
 
     const draggedTaskRef = useRef<HTMLDivElement | null>(null);
+    const touchTimeout = useRef<NodeJS.Timeout | null>(null);
+
+    // 터치 이벤트 핸들러
+    const handleTouchStart = (e: React.TouchEvent, task: Task) => {
+        // 롱 프레스 감지를 위한 타임아웃 설정
+        touchTimeout.current = setTimeout(() => {
+            setDraggedTask(task);
+            setIsDragging(true);
+            if (draggedTaskRef.current) {
+                draggedTaskRef.current.style.opacity = "0.5";
+            }
+        }, 500); // 500ms 롱 프레스
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        if (!isDragging || !draggedTask) return;
+
+        e.preventDefault();
+        const touch = e.touches[0];
+        const element = document.elementFromPoint(touch.clientX, touch.clientY);
+
+        // 보드 요소 찾기
+        const boardElement = element?.closest(
+            "[data-board-id]"
+        ) as HTMLElement | null;
+        const taskElement = element?.closest(
+            "[data-task-id]"
+        ) as HTMLElement | null;
+
+        if (boardElement) {
+            const targetBoardId = boardElement.getAttribute("data-board-id");
+
+            // 다른 보드로 이동하는 경우
+            if (targetBoardId && targetBoardId !== boardId) {
+                if (taskElement) {
+                    const taskId =
+                        taskElement.getAttribute("data-task-id") || undefined;
+                    const rect = taskElement.getBoundingClientRect();
+                    const position =
+                        touch.clientY < rect.top + rect.height / 2
+                            ? "before"
+                            : "after";
+
+                    setDropPosition({ taskId, position });
+                } else {
+                    // 보드의 마지막으로 이동
+                    setDropPosition({ taskId: undefined, position: "after" });
+                }
+            }
+            // 같은 보드 내에서 이동하는 경우
+            else if (taskElement) {
+                const taskId =
+                    taskElement.getAttribute("data-task-id") || undefined;
+                const rect = taskElement.getBoundingClientRect();
+                const position =
+                    touch.clientY < rect.top + rect.height / 2
+                        ? "before"
+                        : "after";
+
+                if (draggedTask.id !== taskId) {
+                    setDropPosition({ taskId, position });
+                }
+            }
+        }
+    };
+
+    const handleTouchEnd = () => {
+        if (touchTimeout.current) {
+            clearTimeout(touchTimeout.current);
+        }
+
+        if (isDragging && draggedTask && dropPosition) {
+            const element = document.elementFromPoint(
+                window.innerWidth / 2,
+                window.innerHeight / 2
+            );
+            const boardElement = element?.closest(
+                "[data-board-id]"
+            ) as HTMLElement | null;
+            const targetBoardId = boardElement?.getAttribute("data-board-id");
+
+            // 다른 보드로 이동하는 경우
+            if (targetBoardId && targetBoardId !== boardId) {
+                const targetTask = tasks.find(
+                    (t) => t.id === dropPosition.taskId
+                );
+                const targetIndex = targetTask
+                    ? tasks.findIndex((t) => t.id === targetTask.id)
+                    : tasks.length;
+
+                const newTasks = [...tasks];
+                newTasks.splice(targetIndex, 0, draggedTask);
+                boardActions.moveTaskBetweenBoards(
+                    draggedTask.id,
+                    boardId,
+                    targetBoardId,
+                    newTasks
+                );
+            }
+            // 같은 보드 내에서 이동하는 경우
+            else {
+                const targetTask = tasks.find(
+                    (t) => t.id === dropPosition.taskId
+                );
+                const oldIndex = tasks.findIndex(
+                    (t) => t.id === draggedTask.id
+                );
+                const newIndex = targetTask
+                    ? tasks.findIndex((t) => t.id === targetTask.id)
+                    : tasks.length;
+
+                if (oldIndex !== newIndex) {
+                    const newTasks = [...tasks];
+                    newTasks.splice(oldIndex, 1);
+                    newTasks.splice(newIndex, 0, draggedTask);
+                    boardActions.reorderTaskInBoard(boardId, newTasks);
+                }
+            }
+        }
+
+        setIsDragging(false);
+        setDraggedTask(null);
+        setDropPosition(null);
+
+        if (draggedTaskRef.current) {
+            draggedTaskRef.current.style.opacity = "1";
+        }
+    };
 
     const handleTaskDragStart = (
         e: React.DragEvent<HTMLDivElement>,
@@ -132,6 +261,9 @@ export default function TaskList({
                     key={task.id}
                     data-task-id={task.id}
                     draggable
+                    onTouchStart={(e) => handleTouchStart(e, task)}
+                    onTouchMove={(e) => handleTouchMove(e)}
+                    onTouchEnd={handleTouchEnd}
                     onDragStart={(e) => handleTaskDragStart(e, task)}
                     onDragEnd={(e) => {
                         handleTaskDragEnd(e);
@@ -165,6 +297,7 @@ export default function TaskList({
                                 ? "mt-8"
                                 : "mt-2"
                         }
+                        ${isDragging ? "touch-none" : ""}
                         hover:cursor-grab active:cursor-grabbing
                     `}
                 >
@@ -177,9 +310,7 @@ export default function TaskList({
                                         ? "-top-4"
                                         : "-bottom-4"
                                 }
-
                                 rounded-md
-
                             `}
                         />
                     )}

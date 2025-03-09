@@ -9,8 +9,10 @@ type Props = {
 
 export default function BoardList({ boards, boardActions }: Props) {
     const [draggedBoard, setDraggedBoard] = useState<Board | null>(null);
+    const [isDragging, setIsDragging] = useState(false);
 
     const draggedBoardRef = useRef<HTMLDivElement | null>(null);
+    const touchTimeout = useRef<NodeJS.Timeout | null>(null);
 
     const handleDragStart = (
         e: React.DragEvent<HTMLDivElement>,
@@ -72,6 +74,64 @@ export default function BoardList({ boards, boardActions }: Props) {
         }
     };
 
+    // 터치 이벤트 핸들러
+    const handleTouchStart = (e: React.TouchEvent, board: Board) => {
+        // 롱 프레스 감지를 위한 타임아웃 설정
+        touchTimeout.current = setTimeout(() => {
+            setDraggedBoard(board);
+            setIsDragging(true);
+            if (draggedBoardRef.current) {
+                draggedBoardRef.current.style.opacity = "0.5";
+            }
+        }, 500); // 500ms 롱 프레스
+    };
+
+    const handleTouchMove = (e: React.TouchEvent) => {
+        if (!isDragging || !draggedBoard) return;
+
+        e.preventDefault();
+        const touch = e.touches[0];
+        const element = document.elementFromPoint(touch.clientX, touch.clientY);
+        const boardElement = element?.closest(
+            "[data-board-id]"
+        ) as HTMLElement | null;
+
+        if (boardElement) {
+            const targetBoardId = boardElement.getAttribute("data-board-id");
+            if (targetBoardId && draggedBoard.id !== targetBoardId) {
+                const targetBoard = boards.find((b) => b.id === targetBoardId);
+                if (targetBoard) {
+                    const oldIndex = boards.findIndex(
+                        (b) => b.id === draggedBoard.id
+                    );
+                    const newIndex = boards.findIndex(
+                        (b) => b.id === targetBoard.id
+                    );
+
+                    if (oldIndex !== newIndex) {
+                        const newBoards = [...boards];
+                        newBoards.splice(oldIndex, 1);
+                        newBoards.splice(newIndex, 0, draggedBoard);
+                        boardActions.reorderBoards(newBoards);
+                    }
+                }
+            }
+        }
+    };
+
+    const handleTouchEnd = () => {
+        if (touchTimeout.current) {
+            clearTimeout(touchTimeout.current);
+        }
+
+        setIsDragging(false);
+        setDraggedBoard(null);
+
+        if (draggedBoardRef.current) {
+            draggedBoardRef.current.style.opacity = "1";
+        }
+    };
+
     if (boards.length === 0) {
         return (
             <div className="text-center text-gray-500 py-10">
@@ -85,13 +145,18 @@ export default function BoardList({ boards, boardActions }: Props) {
             {boards.map((board) => (
                 <div
                     key={board.id}
+                    data-board-id={board.id}
                     draggable
+                    onTouchStart={(e) => handleTouchStart(e, board)}
+                    onTouchMove={(e) => handleTouchMove(e)}
+                    onTouchEnd={handleTouchEnd}
                     onDragStart={(e) => handleDragStart(e, board)}
                     onDragEnd={handleDragEnd}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(e, board)}
                     ref={draggedBoard?.id === board.id ? draggedBoardRef : null}
+                    className={`${isDragging ? "touch-none" : ""}`}
                 >
                     <SortableBoardItem
                         board={board}

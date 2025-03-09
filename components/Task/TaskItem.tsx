@@ -60,7 +60,7 @@ export default function TaskItem({
                 </form>
             ) : (
                 <>
-                    <span className="flex-1 cursor-pointer select-none text-black">
+                    <span className="flex-1 select-none text-black">
                         {task.title}
                     </span>
                     <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
