@@ -25,6 +25,9 @@ export default function TaskList({
 
     // 터치 이벤트 핸들러
     const handleTouchStart = (e: React.TouchEvent, task: Task) => {
+        e.preventDefault(); // 기본 동작 방지
+        e.stopPropagation();
+
         // 롱 프레스 감지를 위한 타임아웃 설정
         touchTimeout.current = setTimeout(() => {
             setDraggedTask(task);
@@ -248,7 +251,7 @@ export default function TaskList({
 
     return (
         <div
-            className={`space-y-2 min-h-[100px] p-2 select-none relative`}
+            className={`space-y-2 min-h-[100px] p-2 select-none relative touch-none`}
             onDragOver={(e) => handleTaskDragOver(e)}
             onDragLeave={handleTaskDragLeave}
             onDrop={(e) => {
@@ -264,6 +267,7 @@ export default function TaskList({
                     onTouchStart={(e) => handleTouchStart(e, task)}
                     onTouchMove={(e) => handleTouchMove(e)}
                     onTouchEnd={handleTouchEnd}
+                    onContextMenu={(e) => e.preventDefault()} // 컨텍스트 메뉴 방지
                     onDragStart={(e) => handleTaskDragStart(e, task)}
                     onDragEnd={(e) => {
                         handleTaskDragEnd(e);
@@ -279,6 +283,7 @@ export default function TaskList({
                     className={`
                         relative rounded-lg shadow-sm bg-white
                         transition-all ease-in-out
+                        touch-none select-none
                         ${draggedTask?.id === task.id ? "opacity-30" : ""}
                         ${
                             dropPosition?.taskId === task.id

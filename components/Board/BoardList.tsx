@@ -76,6 +76,9 @@ export default function BoardList({ boards, boardActions }: Props) {
 
     // 터치 이벤트 핸들러
     const handleTouchStart = (e: React.TouchEvent, board: Board) => {
+        e.preventDefault(); // 기본 동작 방지
+        e.stopPropagation();
+
         // 롱 프레스 감지를 위한 타임아웃 설정
         touchTimeout.current = setTimeout(() => {
             setDraggedBoard(board);
@@ -141,7 +144,7 @@ export default function BoardList({ boards, boardActions }: Props) {
     }
 
     return (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 select-none touch-none">
             {boards.map((board) => (
                 <div
                     key={board.id}
@@ -150,13 +153,17 @@ export default function BoardList({ boards, boardActions }: Props) {
                     onTouchStart={(e) => handleTouchStart(e, board)}
                     onTouchMove={(e) => handleTouchMove(e)}
                     onTouchEnd={handleTouchEnd}
+                    onContextMenu={(e) => e.preventDefault()} // 컨텍스트 메뉴 방지
                     onDragStart={(e) => handleDragStart(e, board)}
                     onDragEnd={handleDragEnd}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
                     onDrop={(e) => handleDrop(e, board)}
                     ref={draggedBoard?.id === board.id ? draggedBoardRef : null}
-                    className={`${isDragging ? "touch-none" : ""}`}
+                    className={`
+                        touch-none select-none
+                        ${isDragging ? "touch-none" : ""}
+                    `}
                 >
                     <SortableBoardItem
                         board={board}
