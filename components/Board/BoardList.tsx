@@ -76,7 +76,6 @@ export default function BoardList({ boards, boardActions }: Props) {
 
     // 터치 이벤트 핸들러
     const handleTouchStart = (e: React.TouchEvent, board: Board) => {
-        e.preventDefault(); // 기본 동작 방지
         e.stopPropagation();
 
         // 롱 프레스 감지를 위한 타임아웃 설정
@@ -92,7 +91,6 @@ export default function BoardList({ boards, boardActions }: Props) {
     const handleTouchMove = (e: React.TouchEvent) => {
         if (!isDragging || !draggedBoard) return;
 
-        e.preventDefault();
         const touch = e.touches[0];
         const element = document.elementFromPoint(touch.clientX, touch.clientY);
         const boardElement = element?.closest(
