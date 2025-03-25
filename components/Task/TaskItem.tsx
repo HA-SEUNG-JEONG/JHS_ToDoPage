@@ -1,4 +1,4 @@
-import { Task, BoardAction } from "@/types";
+import { Task, BoardAction, TaskStatus } from "@/types";
 import { useState } from "react";
 
 interface TaskItemProps {
@@ -27,21 +27,51 @@ export default function TaskItem({
         setIsEditing(false);
     };
 
-    const handleDelete = () => {
+    const handleDelete = (e: React.MouseEvent) => {
+        e.stopPropagation();
         if (window.confirm("정말로 이 태스크를 삭제하시겠습니까?")) {
             boardActions.deleteTask(boardId, task.id);
         }
     };
 
+    const getStatusColor = (status: TaskStatus) => {
+        switch (status) {
+            case "todo":
+                return "bg-gray-100 text-gray-800";
+            case "in-progress":
+                return "bg-blue-100 text-blue-800";
+            case "done":
+                return "bg-green-100 text-green-800";
+            default:
+                return "bg-gray-100 text-gray-800";
+        }
+    };
+
+    const getStatusText = (status: TaskStatus) => {
+        switch (status) {
+            case "todo":
+                return "할 일";
+            case "in-progress":
+                return "진행 중";
+            case "done":
+                return "완료";
+            default:
+                return "할 일";
+        }
+    };
+
     return (
-        <div className="group relative flex justify-start items-center p-2 rounded-lg">
+        <div className="p-3">
             {isEditing ? (
-                <form onSubmit={handleSubmit} className="flex gap-2">
+                <form
+                    onSubmit={handleSubmit}
+                    className="flex items-center gap-2"
+                >
                     <input
                         type="text"
                         value={editTitle}
                         onChange={(e) => setEditTitle(e.target.value)}
-                        className="flex-1 px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500 text-black"
+                        className="flex-1 px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                         autoFocus
                     />
                     <button
@@ -59,15 +89,32 @@ export default function TaskItem({
                     </button>
                 </form>
             ) : (
-                <>
-                    <span className="flex-1 select-none text-black">
-                        {task.title}
-                    </span>
-                    <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                        <span
+                            className={`text-sm font-medium ${
+                                task.status === "done"
+                                    ? "line-through text-gray-500"
+                                    : ""
+                            }`}
+                        >
+                            {task.title}
+                        </span>
+                        <span
+                            className={`px-2 py-1 text-xs rounded-full ${getStatusColor(
+                                task.status
+                            )}`}
+                        >
+                            {getStatusText(task.status)}
+                        </span>
+                    </div>
+                    <div className="flex gap-2">
                         <button
-                            onClick={() => setIsEditing(true)}
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                setIsEditing(true);
+                            }}
                             className="text-gray-500 hover:text-blue-500"
-                            aria-label="태스크 수정"
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -82,7 +129,6 @@ export default function TaskItem({
                         <button
                             onClick={handleDelete}
                             className="text-gray-500 hover:text-red-500"
-                            aria-label="태스크 삭제"
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -96,7 +142,7 @@ export default function TaskItem({
                             </svg>
                         </button>
                     </div>
-                </>
+                </div>
             )}
         </div>
     );

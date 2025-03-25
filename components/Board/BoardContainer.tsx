@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Board, Task } from "@/types";
+import { Board, Task, TaskStatus } from "@/types";
 import { storageUtil } from "@/utils/storage";
 import BoardList from "./BoardList";
 import CreateBoardForm from "./CreateBoardForm";
@@ -16,7 +16,29 @@ export default function BoardContainer() {
 
     useEffect(() => {
         const savedBoards = storageUtil.getBoards();
-        setBoards(savedBoards);
+        if (savedBoards.length === 0) {
+            // 기본 상태 보드 생성
+            const defaultBoards: Board[] = [
+                {
+                    id: crypto.randomUUID(),
+                    title: "To do",
+                    tasks: []
+                },
+                {
+                    id: crypto.randomUUID(),
+                    title: "In Progress",
+                    tasks: []
+                },
+                {
+                    id: crypto.randomUUID(),
+                    title: "Done",
+                    tasks: []
+                }
+            ];
+            saveBoardInStorage(defaultBoards);
+        } else {
+            setBoards(savedBoards);
+        }
     }, []);
 
     const createBoard = (title: string) => {
@@ -48,10 +70,19 @@ export default function BoardContainer() {
     };
 
     const addTask = (boardId: string, title: string) => {
-        const newTask = {
+        const board = boards.find((b) => b.id === boardId);
+        if (!board) return;
+
+        const newTask: Task = {
             id: crypto.randomUUID(),
             title,
-            boardId
+            boardId,
+            status:
+                board.title === "To do"
+                    ? "todo"
+                    : board.title === "In Progress"
+                    ? "in-progress"
+                    : "done"
         };
 
         const updatedBoards = boards.map((board) => {
@@ -109,8 +140,7 @@ export default function BoardContainer() {
     const moveTaskBetweenBoards = (
         taskId: string,
         sourceBoardId: string,
-        targetBoardId: string,
-        tasks: Task[]
+        targetBoardId: string
     ) => {
         const sourceBoard = boards.find((board) => board.id === sourceBoardId);
         const targetBoard = boards.find((board) => board.id === targetBoardId);
@@ -119,11 +149,27 @@ export default function BoardContainer() {
         const taskToMove = sourceBoard.tasks.find((task) => task.id === taskId);
         if (!taskToMove) return;
 
+        // 이동된 태스크의 상태 업데이트
+        const newStatus: TaskStatus =
+            targetBoard.title === "To do"
+                ? "todo"
+                : targetBoard.title === "In Progress"
+                ? "in-progress"
+                : "done";
+
+        const updatedTaskToMove = {
+            ...taskToMove,
+            boardId: targetBoardId,
+            status: newStatus
+        };
+
         const updateBoard = {
             [sourceBoardId]: {
                 tasks: sourceBoard.tasks.filter((task) => task.id !== taskId)
             },
-            [targetBoardId]: { tasks }
+            [targetBoardId]: {
+                tasks: [...targetBoard.tasks, updatedTaskToMove]
+            }
         };
 
         const updatedBoards = boards.map((board) =>

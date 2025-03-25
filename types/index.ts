@@ -1,8 +1,11 @@
 // types/board.ts
+export type TaskStatus = "todo" | "in-progress" | "done";
+
 export interface Task {
     id: string;
     title: string;
     boardId: string;
+    status: TaskStatus;
 }
 
 export interface Board {
@@ -22,7 +25,6 @@ export interface BoardAction {
     moveTaskBetweenBoards: (
         taskId: string,
         sourceBoardId: string,
-        targetBoardId: string,
-        tasks: Task[]
+        targetBoardId: string
     ) => void;
 }

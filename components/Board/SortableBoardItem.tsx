@@ -17,6 +17,32 @@ export default function SortableBoardItem({
     const [editTitle, setEditTitle] = useState(title);
     const draggedItemRef = useRef<HTMLDivElement | null>(null);
 
+    const getStatusColor = (title: string) => {
+        switch (title) {
+            case "To do":
+                return "bg-gray-100 text-gray-800";
+            case "In Progress":
+                return "bg-blue-100 text-blue-800";
+            case "Done":
+                return "bg-green-100 text-green-800";
+            default:
+                return "bg-gray-100 text-gray-800";
+        }
+    };
+
+    const getStatusText = (title: string): string => {
+        switch (title) {
+            case "To do":
+                return "할 일";
+            case "In Progress":
+                return "진행 중";
+            case "Done":
+                return "완료";
+            default:
+                return "할 일";
+        }
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!editTitle.trim()) return;
@@ -37,10 +63,7 @@ export default function SortableBoardItem({
     };
 
     return (
-        <div
-            ref={draggedItemRef}
-            className="p-4 bg-white rounded-lg shadow-md transition-all duration-200"
-        >
+        <div ref={draggedItemRef} className="p-4 bg-white rounded-lg shadow-md">
             <div className="flex items-center justify-between mb-4">
                 {isEditing ? (
                     <form
@@ -58,7 +81,6 @@ export default function SortableBoardItem({
                         <button
                             type="submit"
                             className="px-3 py-1 text-sm text-white bg-blue-500 rounded-lg hover:bg-blue-600"
-                            aria-label="수정된 보드 타이틀 저장"
                         >
                             저장
                         </button>
@@ -66,25 +88,33 @@ export default function SortableBoardItem({
                             type="button"
                             onClick={handleCancel}
                             className="px-3 py-1 text-sm text-gray-600 bg-gray-100 rounded-lg hover:bg-gray-200"
-                            aria-label="수정 취소"
                         >
                             취소
                         </button>
                     </form>
                 ) : (
                     <>
-                        <div className="cursor-grab flex-1 select-none">
+                        <div className="flex items-center gap-2">
                             <h3 className="text-lg font-semibold text-black">
                                 {board.title}
                             </h3>
+                            <span
+                                className={`px-2 py-1 text-xs rounded-full ${getStatusColor(
+                                    board.title
+                                )}`}
+                            >
+                                {getStatusText(board.title)}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                                ({tasks.length}개의 항목)
+                            </span>
                         </div>
-                        <div className="flex gap-2 ml-4 select-none">
+                        <div className="flex gap-2">
                             <button
                                 onClick={(e) => {
                                     e.stopPropagation();
                                     setIsEditing(true);
                                 }}
-                                aria-label="보드 수정"
                                 className="text-gray-500 hover:text-blue-500"
                             >
                                 <svg
@@ -100,7 +130,6 @@ export default function SortableBoardItem({
                             <button
                                 onClick={handleDelete}
                                 className="text-gray-500 hover:text-red-500"
-                                aria-label="보드 삭제"
                             >
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
