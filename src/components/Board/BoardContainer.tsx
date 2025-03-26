@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import BoardList from "./BoardList";
 import CreateBoardForm from "./CreateBoardForm";
 import { Board, Task, TaskStatus } from "@/src/types";
-import { storageUtil } from "@/utils/storage";
+import { storageUtil } from "@/src/utils/storage";
 
 export default function BoardContainer() {
     const [boards, setBoards] = useState<Board[]>([]);
