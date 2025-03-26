@@ -1,10 +1,9 @@
-"use client";
-
 import { useState, useEffect } from "react";
-import { Board, Task, TaskStatus } from "@/types";
-import { storageUtil } from "@/utils/storage";
+
 import BoardList from "./BoardList";
 import CreateBoardForm from "./CreateBoardForm";
+import { Board, Task, TaskStatus } from "@/src/types";
+import { storageUtil } from "@/utils/storage";
 
 export default function BoardContainer() {
     const [boards, setBoards] = useState<Board[]>([]);

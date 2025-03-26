@@ -1,5 +1,4 @@
-// utils/storage.ts
-import { Board } from "@/types";
+import { Board } from "@/src/types";
 
 const STORAGE_KEY = "kanban-boards";
 
