@@ -33,13 +33,11 @@
 │     ├─ AddTaskForm.tsx
 │     ├─ TaskItem.tsx
 │     └─ TaskList.tsx
-├─ next.config.ts
 ├─ package-lock.json
 ├─ package.json
 ├─ public
 │  ├─ file.svg
 │  ├─ globe.svg
-│  ├─ next.svg
 │  ├─ vercel.svg
 │  └─ window.svg
 ├─ tailwind.config.ts
