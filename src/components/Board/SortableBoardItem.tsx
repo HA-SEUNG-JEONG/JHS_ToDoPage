@@ -1,7 +1,7 @@
 import { Board, BoardAction } from "@/types";
 import { useState, useRef } from "react";
-import TaskList from "../Task/TaskList";
-import AddTaskForm from "../Task/AddTaskForm";
+import TaskList from "@/components/Task/TaskList";
+import AddTaskForm from "@/components/Task/AddTaskForm";
 
 interface SortableBoardItemProps {
     board: Board;
