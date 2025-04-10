@@ -18,32 +18,6 @@ export default function SortableBoardItem({
     const [editTitle, setEditTitle] = useState(title);
     const draggedItemRef = useRef<HTMLDivElement | null>(null);
 
-    const getStatusColor = (title: string) => {
-        switch (title) {
-            case "To do":
-                return "bg-gray-100 text-gray-800";
-            case "In Progress":
-                return "bg-blue-100 text-blue-800";
-            case "Done":
-                return "bg-green-100 text-green-800";
-            default:
-                return "bg-gray-100 text-gray-800";
-        }
-    };
-
-    const getStatusText = (title: string): string => {
-        switch (title) {
-            case "To do":
-                return "할 일";
-            case "In Progress":
-                return "진행 중";
-            case "Done":
-                return "완료";
-            default:
-                return "할 일";
-        }
-    };
-
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!editTitle.trim()) return;
