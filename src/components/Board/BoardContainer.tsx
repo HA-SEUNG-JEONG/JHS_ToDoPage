@@ -1,38 +1,43 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Board, Task, TaskStatus } from "@/types";
 import { storageUtil } from "@/utils/storage";
 import BoardList from "./BoardList";
 import CreateBoardForm from "./CreateBoardForm";
+import { BoardActions } from "@/types/action";
+
+const DEFAULT_BOARDS: Omit<Board, "id">[] = [
+    { title: "To do", tasks: [] },
+    { title: "In Progress", tasks: [] },
+    { title: "Done", tasks: [] }
+];
+
+const getTaskStatus = (boardTitle: string): TaskStatus => {
+    switch (boardTitle) {
+        case "In Progress":
+            return "in-progress";
+        case "Done":
+            return "done";
+        case "To do":
+        default:
+            return "todo";
+    }
+};
 
 export default function BoardContainer() {
     const [boards, setBoards] = useState<Board[]>([]);
 
-    const saveBoardInStorage = (board: Board[]) => {
-        setBoards(board);
-        storageUtil.saveBoards(board);
+    const saveBoardInStorage = (updatedBoards: Board[]) => {
+        setBoards(updatedBoards);
+        storageUtil.saveBoards(updatedBoards);
     };
 
     useEffect(() => {
         const savedBoards = storageUtil.getBoards();
         if (savedBoards.length === 0) {
-            // 기본 상태 보드 생성
-            const defaultBoards: Board[] = [
-                {
-                    id: crypto.randomUUID(),
-                    title: "To do",
-                    tasks: []
-                },
-                {
-                    id: crypto.randomUUID(),
-                    title: "In Progress",
-                    tasks: []
-                },
-                {
-                    id: crypto.randomUUID(),
-                    title: "Done",
-                    tasks: []
-                }
-            ];
+            const defaultBoards = DEFAULT_BOARDS.map((board) => ({
+                ...board,
+                id: crypto.randomUUID()
+            }));
             saveBoardInStorage(defaultBoards);
         } else {
             setBoards(savedBoards);
@@ -45,9 +50,7 @@ export default function BoardContainer() {
             title,
             tasks: []
         };
-
-        const updatedBoards = [...boards, newBoard];
-        saveBoardInStorage(updatedBoards);
+        saveBoardInStorage([...boards, newBoard]);
     };
 
     const editBoardTitle = (id: string, newTitle: string) => {
@@ -63,8 +66,7 @@ export default function BoardContainer() {
     };
 
     const reorderBoards = (reorderedBoards: Board[]) => {
-        setBoards(reorderedBoards);
-        storageUtil.saveBoards(reorderedBoards);
+        saveBoardInStorage(reorderedBoards);
     };
 
     const addTask = (boardId: string, title: string) => {
@@ -75,21 +77,14 @@ export default function BoardContainer() {
             id: crypto.randomUUID(),
             title,
             boardId,
-            status:
-                board.title === "To do"
-                    ? "todo"
-                    : board.title === "In Progress"
-                    ? "in-progress"
-                    : "done"
+            status: getTaskStatus(board.title)
         };
 
         const updatedBoards = boards.map((board) => {
             if (board.id !== boardId) return board;
-
-            const tasks = Array.isArray(board.tasks) ? board.tasks : [];
             return {
                 ...board,
-                tasks: [...tasks, newTask]
+                tasks: [...board.tasks, newTask]
             };
         });
 
@@ -99,39 +94,34 @@ export default function BoardContainer() {
     const editTask = (boardId: string, taskId: string, newTitle: string) => {
         const updatedBoards = boards.map((board) => {
             if (board.id !== boardId) return board;
-
             const updatedTasks = board.tasks.map((task) =>
                 task.id === taskId ? { ...task, title: newTitle } : task
             );
-
             return { ...board, tasks: updatedTasks };
         });
-
         saveBoardInStorage(updatedBoards);
     };
 
-    const deleteTask = (boardId: string, taskId: string) => {
-        const updatedBoards = boards.map((board) => {
-            if (board.id === boardId) {
-                const filteredTasks = board.tasks.filter(
-                    (task) => task.id !== taskId
-                );
-                return { ...board, tasks: filteredTasks };
-            }
-            return board;
-        });
-
-        saveBoardInStorage(updatedBoards);
-    };
+    const deleteTask = useCallback(
+        (boardId: string, taskId: string) => {
+            const updatedBoards = boards.map((board) => {
+                if (board.id === boardId) {
+                    const filteredTasks = board.tasks.filter(
+                        (task) => task.id !== taskId
+                    );
+                    return { ...board, tasks: filteredTasks };
+                }
+                return board;
+            });
+            saveBoardInStorage(updatedBoards);
+        },
+        [boards, saveBoardInStorage]
+    );
 
     const reorderTaskInBoard = (boardId: string, tasks: Task[]) => {
-        const updatedBoards = boards.map((board) => {
-            if (board.id === boardId) {
-                return { ...board, tasks };
-            }
-            return board;
-        });
-
+        const updatedBoards = boards.map((board) =>
+            board.id === boardId ? { ...board, tasks } : board
+        );
         saveBoardInStorage(updatedBoards);
     };
 
@@ -147,39 +137,33 @@ export default function BoardContainer() {
         const taskToMove = sourceBoard.tasks.find((task) => task.id === taskId);
         if (!taskToMove) return;
 
-        // 이동된 태스크의 상태 업데이트
-        const newStatus: TaskStatus =
-            targetBoard.title === "To do"
-                ? "todo"
-                : targetBoard.title === "In Progress"
-                ? "in-progress"
-                : "done";
-
+        const newStatus = getTaskStatus(targetBoard.title);
         const updatedTaskToMove = {
             ...taskToMove,
             boardId: targetBoardId,
             status: newStatus
         };
 
-        const updateBoard = {
-            [sourceBoardId]: {
-                tasks: sourceBoard.tasks.filter((task) => task.id !== taskId)
-            },
-            [targetBoardId]: {
-                tasks: [...targetBoard.tasks, updatedTaskToMove]
+        const updatedBoards = boards.map((board) => {
+            if (board.id === sourceBoardId) {
+                return {
+                    ...board,
+                    tasks: board.tasks.filter((task) => task.id !== taskId)
+                };
             }
-        };
-
-        const updatedBoards = boards.map((board) =>
-            updateBoard[board.id]
-                ? { ...board, ...updateBoard[board.id] }
-                : board
-        );
+            if (board.id === targetBoardId) {
+                return {
+                    ...board,
+                    tasks: [...board.tasks, updatedTaskToMove]
+                };
+            }
+            return board;
+        });
 
         saveBoardInStorage(updatedBoards);
     };
 
-    const boardActions = {
+    const boardActions: BoardActions = {
         editBoardTitle,
         deleteBoard,
         reorderBoards,
