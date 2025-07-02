@@ -1,5 +1,4 @@
 import {
-    BoardStatus,
     BOARD_STATUSES,
     DEFAULT_BOARD_STATUS
 } from "@/constants/board";

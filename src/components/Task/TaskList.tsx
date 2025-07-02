@@ -1,18 +1,18 @@
-import { Task, BoardAction } from "@/types";
+import { Task } from "@/types";
 import { useState, useRef } from "react";
 import TaskItem from "./TaskItem";
+import { useBoards } from "@/context/BoardContext";
 
 interface TaskListProps {
     tasks: Task[];
     boardId: string;
-    boardActions: BoardAction;
 }
 
 export default function TaskList({
     tasks,
-    boardId,
-    boardActions
+    boardId
 }: TaskListProps) {
+    const { dispatch } = useBoards();
     const [draggedTask, setDraggedTask] = useState<Task | null>(null);
     const [isDragging, setIsDragging] = useState(false);
     const [dropPosition, setDropPosition] = useState<{
@@ -101,11 +101,14 @@ export default function TaskList({
 
             // 다른 보드로 이동하는 경우
             if (targetBoardId && targetBoardId !== boardId) {
-                boardActions.moveTaskBetweenBoards(
-                    draggedTask.id,
-                    boardId,
-                    targetBoardId
-                );
+                dispatch({
+                    type: "MOVE_TASK_BETWEEN_BOARDS",
+                    payload: {
+                        taskId: draggedTask.id,
+                        sourceBoardId: boardId,
+                        targetBoardId: targetBoardId
+                    }
+                });
             }
             // 같은 보드 내에서 이동하는 경우
             else {
@@ -123,7 +126,10 @@ export default function TaskList({
                     const newTasks = [...tasks];
                     newTasks.splice(oldIndex, 1);
                     newTasks.splice(newIndex, 0, draggedTask);
-                    boardActions.reorderTaskInBoard(boardId, newTasks);
+                    dispatch({
+                        type: "REORDER_TASK_IN_BOARD",
+                        payload: { boardId, tasks: newTasks }
+                    });
                 }
             }
         }
@@ -199,15 +205,17 @@ export default function TaskList({
                     const newTasks = [...tasks];
                     newTasks.splice(oldIndex, 1);
                     newTasks.splice(newIndex, 0, tasks[oldIndex]);
-                    boardActions.reorderTaskInBoard(boardId, newTasks);
+                    dispatch({
+                        type: "REORDER_TASK_IN_BOARD",
+                        payload: { boardId, tasks: newTasks }
+                    });
                 }
             } else {
                 // 다른 보드로의 이동
-                boardActions.moveTaskBetweenBoards(
-                    taskId,
-                    sourceBoardId,
-                    boardId
-                );
+                dispatch({
+                    type: "MOVE_TASK_BETWEEN_BOARDS",
+                    payload: { taskId, sourceBoardId, targetBoardId: boardId }
+                });
             }
         } catch (error) {
             console.error("태스크 드롭 처리 중 오류 발생:", error);
@@ -251,11 +259,7 @@ export default function TaskList({
                             : ""
                     }`}
                 >
-                    <TaskItem
-                        task={task}
-                        boardId={boardId}
-                        boardActions={boardActions}
-                    />
+                    <TaskItem task={task} boardId={boardId} />
                 </div>
             ))}
         </div>

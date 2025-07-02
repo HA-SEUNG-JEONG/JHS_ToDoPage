@@ -1,13 +1,14 @@
-import { Board, BoardAction } from "@/types";
+import { Board } from "@/types";
 import { useState, useRef } from "react";
 import SortableBoardItem from "./SortableBoardItem";
+import { useBoards } from "@/context/BoardContext";
 
 type Props = {
     boards: Board[];
-    boardActions: BoardAction;
 };
 
-export default function BoardList({ boards, boardActions }: Props) {
+export default function BoardList({ boards }: Props) {
+    const { dispatch } = useBoards();
     const [draggedBoard, setDraggedBoard] = useState<Board | null>(null);
     const [isDragging, setIsDragging] = useState(false);
 
@@ -57,7 +58,7 @@ export default function BoardList({ boards, boardActions }: Props) {
             newBoards.splice(oldIndex, 1);
             newBoards.splice(newIndex, 0, draggedBoard);
 
-            boardActions.reorderBoards(newBoards);
+            dispatch({ type: "REORDER_BOARDS", payload: newBoards });
         }
     };
 
@@ -113,7 +114,10 @@ export default function BoardList({ boards, boardActions }: Props) {
                         const newBoards = [...boards];
                         newBoards.splice(oldIndex, 1);
                         newBoards.splice(newIndex, 0, draggedBoard);
-                        boardActions.reorderBoards(newBoards);
+                        dispatch({
+                            type: "REORDER_BOARDS",
+                            payload: newBoards
+                        });
                     }
                 }
             }
@@ -163,10 +167,7 @@ export default function BoardList({ boards, boardActions }: Props) {
                         ${isDragging ? "touch-none" : ""}
                     `}
                 >
-                    <SortableBoardItem
-                        board={board}
-                        boardActions={boardActions}
-                    />
+                    <SortableBoardItem board={board} />
                 </div>
             ))}
         </div>
