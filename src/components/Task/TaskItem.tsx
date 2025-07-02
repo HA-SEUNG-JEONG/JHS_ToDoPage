@@ -65,7 +65,7 @@ export default function TaskItem({
             {isEditing ? (
                 <form
                     onSubmit={handleSubmit}
-                    className="flex items-center gap-2"
+                    className="flex flex-col sm:flex-row items-stretch gap-2"
                 >
                     <input
                         type="text"
@@ -74,29 +74,27 @@ export default function TaskItem({
                         className="flex-1 px-2 py-1 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                         autoFocus
                     />
-                    <button
-                        type="submit"
-                        className="px-2 py-1 text-sm text-white bg-blue-500 rounded hover:bg-blue-600"
-                    >
-                        저장
-                    </button>
-                    <button
-                        type="button"
-                        onClick={handleCancel}
-                        className="px-2 py-1 text-sm text-gray-600 bg-gray-100 rounded hover:bg-gray-200"
-                    >
-                        취소
-                    </button>
+                    <div className="flex gap-2 justify-end">
+                        <button
+                            type="submit"
+                            className="px-2 py-1 text-sm text-white bg-blue-500 rounded hover:bg-blue-600"
+                        >
+                            저장
+                        </button>
+                        <button
+                            type="button"
+                            onClick={handleCancel}
+                            className="px-2 py-1 text-sm text-gray-600 bg-gray-100 rounded hover:bg-gray-200"
+                        >
+                            취소
+                        </button>
+                    </div>
                 </form>
             ) : (
-                <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 flex-1">
                         <span
-                            className={`text-sm font-medium ${
-                                task.status === "done"
-                                    ? "line-through text-gray-500"
-                                    : ""
-                            }`}
+                            className={`text-sm font-medium ${task.status === "done" ? "line-through text-gray-500" : ""}`}
                         >
                             {task.title}
                         </span>
@@ -108,13 +106,13 @@ export default function TaskItem({
                             {getStatusText(task.status)}
                         </span>
                     </div>
-                    <div className="flex gap-2">
+                    <div className="flex gap-2 self-end sm:self-center">
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
                                 setIsEditing(true);
                             }}
-                            className="text-gray-500 hover:text-blue-500"
+                            className="text-gray-500 hover:text-blue-500 p-1"
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
@@ -128,7 +126,7 @@ export default function TaskItem({
                         </button>
                         <button
                             onClick={handleDelete}
-                            className="text-gray-500 hover:text-red-500"
+                            className="text-gray-500 hover:text-red-500 p-1"
                         >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
