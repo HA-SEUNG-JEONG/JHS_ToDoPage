@@ -1,7 +1,4 @@
-import {
-    BOARD_STATUSES,
-    DEFAULT_BOARD_STATUS
-} from "@/constants/board";
+import { BOARD_STATUSES, DEFAULT_BOARD_STATUS } from "@/constants/board";
 
 interface BoardHeaderProps {
     title: string;
@@ -60,7 +57,7 @@ export default function BoardHeader({
     }
 
     return (
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
             <div className="flex items-center gap-2">
                 <h3 className="text-lg font-semibold text-black">{title}</h3>
                 <span
@@ -75,7 +72,7 @@ export default function BoardHeader({
             <div className="flex gap-2">
                 <button
                     onClick={onEditClick}
-                    className="text-gray-500 hover:text-blue-500"
+                    className="text-gray-500 hover:text-blue-500 p-1"
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"
@@ -89,7 +86,7 @@ export default function BoardHeader({
                 </button>
                 <button
                     onClick={onDeleteClick}
-                    className="text-gray-500 hover:text-red-500"
+                    className="text-gray-500 hover:text-red-500 p-1"
                 >
                     <svg
                         xmlns="http://www.w3.org/2000/svg"

@@ -11,9 +11,46 @@ export default function BoardList({ boards }: Props) {
     const { dispatch } = useBoards();
     const [draggedBoard, setDraggedBoard] = useState<Board | null>(null);
     const [isDragging, setIsDragging] = useState(false);
+    const [keyboardDraggedBoardId, setKeyboardDraggedBoardId] = useState<
+        string | null
+    >(null);
 
     const draggedBoardRef = useRef<HTMLDivElement | null>(null);
     const touchTimeout = useRef<NodeJS.Timeout | null>(null);
+
+    const handleKeyDown = (
+        e: React.KeyboardEvent<HTMLDivElement>,
+        board: Board
+    ) => {
+        if (e.key === " " || e.key === "Enter") {
+            e.preventDefault();
+            if (keyboardDraggedBoardId === board.id) {
+                setKeyboardDraggedBoardId(null);
+            } else {
+                setKeyboardDraggedBoardId(board.id);
+            }
+        } else if (
+            keyboardDraggedBoardId === board.id &&
+            (e.key === "ArrowLeft" || e.key === "ArrowRight")
+        ) {
+            e.preventDefault();
+            const currentIndex = boards.findIndex((b) => b.id === board.id);
+            let newIndex = currentIndex;
+
+            if (e.key === "ArrowLeft") {
+                newIndex = Math.max(0, currentIndex - 1);
+            } else if (e.key === "ArrowRight") {
+                newIndex = Math.min(boards.length - 1, currentIndex + 1);
+            }
+
+            if (newIndex !== currentIndex) {
+                const newBoards = [...boards];
+                const [movedBoard] = newBoards.splice(currentIndex, 1);
+                newBoards.splice(newIndex, 0, movedBoard);
+                dispatch({ type: "REORDER_BOARDS", payload: newBoards });
+            }
+        }
+    };
 
     const handleDragStart = (
         e: React.DragEvent<HTMLDivElement>,
@@ -78,21 +115,70 @@ export default function BoardList({ boards }: Props) {
     // 터치 이벤트 핸들러
     const handleTouchStart = (e: React.TouchEvent, board: Board) => {
         e.stopPropagation();
+        setDraggedBoard(board);
+        setIsDragging(true);
 
-        // 롱 프레스 감지를 위한 타임아웃 설정
-        touchTimeout.current = setTimeout(() => {
-            setDraggedBoard(board);
-            setIsDragging(true);
-            if (draggedBoardRef.current) {
-                draggedBoardRef.current.style.opacity = "0.5";
-            }
-        }, 500); // 500ms 롱 프레스
+        if (draggedBoardRef.current) {
+            draggedBoardRef.current.style.opacity = "0.5";
+        }
+
+        // 햅틱 피드백
+        if (navigator.vibrate) {
+            navigator.vibrate(50);
+        }
     };
 
     const handleTouchMove = (e: React.TouchEvent) => {
         if (!isDragging || !draggedBoard) return;
 
         const touch = e.touches[0];
+        const element = document.elementFromPoint(touch.clientX, touch.clientY);
+        const boardElement = element?.closest(
+            "[data-board-id]"
+        ) as HTMLElement | null;
+
+        if (boardElement && draggedBoardRef.current) {
+            const targetBoardId = boardElement.getAttribute("data-board-id");
+            if (targetBoardId && draggedBoard.id !== targetBoardId) {
+                const targetBoard = boards.find((b) => b.id === targetBoardId);
+                if (targetBoard) {
+                    const oldIndex = boards.findIndex(
+                        (b) => b.id === draggedBoard.id
+                    );
+                    const newIndex = boards.findIndex(
+                        (b) => b.id === targetBoard.id
+                    );
+
+                    if (oldIndex !== newIndex) {
+                        // Visually reorder elements without dispatching state change yet
+                        const newBoards = [...boards];
+                        newBoards.splice(oldIndex, 1);
+                        newBoards.splice(newIndex, 0, draggedBoard);
+
+                        // This part is tricky without direct DOM manipulation or a library.
+                        // For now, we'll rely on the touchend to dispatch the actual reorder.
+                        // A more advanced solution would involve creating a ghost element
+                        // and dynamically positioning it, or using CSS transforms.
+                    }
+                }
+            }
+        }
+    };
+
+    const handleTouchEnd = (e: React.TouchEvent) => {
+        if (touchTimeout.current) {
+            clearTimeout(touchTimeout.current);
+        }
+
+        if (!draggedBoard) return;
+
+        setIsDragging(false);
+
+        if (draggedBoardRef.current) {
+            draggedBoardRef.current.style.opacity = "1";
+        }
+
+        const touch = e.changedTouches[0];
         const element = document.elementFromPoint(touch.clientX, touch.clientY);
         const boardElement = element?.closest(
             "[data-board-id]"
@@ -122,19 +208,7 @@ export default function BoardList({ boards }: Props) {
                 }
             }
         }
-    };
-
-    const handleTouchEnd = () => {
-        if (touchTimeout.current) {
-            clearTimeout(touchTimeout.current);
-        }
-
-        setIsDragging(false);
         setDraggedBoard(null);
-
-        if (draggedBoardRef.current) {
-            draggedBoardRef.current.style.opacity = "1";
-        }
     };
 
     if (boards.length === 0) {
@@ -151,11 +225,11 @@ export default function BoardList({ boards }: Props) {
                 <div
                     key={board.id}
                     data-board-id={board.id}
-                    draggable
+                    draggable={!isDragging} // Only draggable on desktop
                     onTouchStart={(e) => handleTouchStart(e, board)}
                     onTouchMove={(e) => handleTouchMove(e)}
                     onTouchEnd={handleTouchEnd}
-                    onContextMenu={(e) => e.preventDefault()} // 컨텍스트 메뉴 방지
+                    onContextMenu={(e) => e.preventDefault()} // Prevent context menu on long press
                     onDragStart={(e) => handleDragStart(e, board)}
                     onDragEnd={handleDragEnd}
                     onDragOver={handleDragOver}
@@ -163,11 +237,19 @@ export default function BoardList({ boards }: Props) {
                     onDrop={(e) => handleDrop(e, board)}
                     ref={draggedBoard?.id === board.id ? draggedBoardRef : null}
                     className={`
-                        touch-none select-none
-                        ${isDragging ? "touch-none" : ""}
+                        select-none
+                        ${isDragging ? "opacity-50" : ""}
+                        ${
+                            keyboardDraggedBoardId === board.id
+                                ? "border-2 border-blue-500"
+                                : ""
+                        }
                     `}
                 >
-                    <SortableBoardItem board={board} />
+                    <SortableBoardItem
+                        board={board}
+                        onKeyDown={handleKeyDown}
+                    />
                 </div>
             ))}
         </div>
