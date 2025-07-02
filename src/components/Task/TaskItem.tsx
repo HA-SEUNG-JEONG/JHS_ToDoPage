@@ -1,24 +1,24 @@
-import { Task, BoardAction, TaskStatus } from "@/types";
+import { Task, TaskStatus } from "@/types";
 import { useState } from "react";
+import { useBoards } from "@/context/BoardContext";
 
 interface TaskItemProps {
     task: Task;
     boardId: string;
-    boardActions: BoardAction;
 }
 
 export default function TaskItem({
     task,
-    boardId,
-    boardActions
+    boardId
 }: TaskItemProps) {
+    const { dispatch } = useBoards();
     const [isEditing, setIsEditing] = useState(false);
     const [editTitle, setEditTitle] = useState(task.title);
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!editTitle.trim()) return;
-        boardActions.editTask(boardId, task.id, editTitle);
+        dispatch({ type: "EDIT_TASK", payload: { boardId, taskId: task.id, newTitle: editTitle } });
         setIsEditing(false);
     };
 
@@ -30,7 +30,7 @@ export default function TaskItem({
     const handleDelete = (e: React.MouseEvent) => {
         e.stopPropagation();
         if (window.confirm("정말로 이 태스크를 삭제하시겠습니까?")) {
-            boardActions.deleteTask(boardId, task.id);
+            dispatch({ type: "DELETE_TASK", payload: { boardId, taskId: task.id } });
         }
     };
 

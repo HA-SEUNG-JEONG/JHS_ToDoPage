@@ -1,4 +1,4 @@
-import { Board } from "@/src/types";
+import { Board } from "@/types";
 
 const STORAGE_KEY = "kanban-boards";
 

@@ -1,18 +1,16 @@
-import { Board, BoardAction } from "@/types";
+import { Board } from "@/types";
 import { useState, useRef } from "react";
 import TaskList from "@/components/Task/TaskList";
 import AddTaskForm from "@/components/Task/AddTaskForm";
 import BoardHeader from "./BoardHeader";
+import { useBoards } from "@/context/BoardContext";
 
 interface SortableBoardItemProps {
     board: Board;
-    boardActions: BoardAction;
 }
 
-export default function SortableBoardItem({
-    board,
-    boardActions
-}: SortableBoardItemProps) {
+export default function SortableBoardItem({ board }: SortableBoardItemProps) {
+    const { dispatch } = useBoards();
     const { title, id, tasks } = board;
     const [isEditing, setIsEditing] = useState(false);
     const [editTitle, setEditTitle] = useState(title);
@@ -21,7 +19,7 @@ export default function SortableBoardItem({
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!editTitle.trim()) return;
-        boardActions.editBoardTitle(board.id, editTitle);
+        dispatch({ type: "EDIT_BOARD_TITLE", payload: { id: board.id, newTitle: editTitle } });
         setIsEditing(false);
     };
 
@@ -33,8 +31,12 @@ export default function SortableBoardItem({
     const handleDelete = (e: React.MouseEvent) => {
         e.stopPropagation();
         if (window.confirm("정말로 이 보드를 삭제하시겠습니까?")) {
-            boardActions.deleteBoard(board.id);
+            dispatch({ type: "DELETE_BOARD", payload: { id: board.id } });
         }
+    };
+
+    const addTask = (title: string) => {
+        dispatch({ type: "ADD_TASK", payload: { boardId: id, title } });
     };
 
     return (
@@ -51,10 +53,8 @@ export default function SortableBoardItem({
                 onDeleteClick={handleDelete}
             />
 
-            <AddTaskForm
-                onSubmit={(title) => boardActions.addTask(id, title)}
-            />
-            <TaskList tasks={tasks} boardId={id} boardActions={boardActions} />
+            <AddTaskForm onSubmit={addTask} />
+            <TaskList tasks={tasks} boardId={id} />
         </div>
     );
 }
