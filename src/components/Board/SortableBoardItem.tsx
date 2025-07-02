@@ -1,5 +1,5 @@
 import { Board } from "@/types";
-import { useState, useRef } from "react";
+import { useState, useRef, KeyboardEvent, MouseEvent } from "react";
 import TaskList from "@/components/Task/TaskList";
 import AddTaskForm from "@/components/Task/AddTaskForm";
 import BoardHeader from "./BoardHeader";
@@ -7,9 +7,13 @@ import { useBoards } from "@/context/BoardContext";
 
 interface SortableBoardItemProps {
     board: Board;
+    onKeyDown: (e: KeyboardEvent<HTMLDivElement>, board: Board) => void;
 }
 
-export default function SortableBoardItem({ board }: SortableBoardItemProps) {
+export default function SortableBoardItem({
+    board,
+    onKeyDown
+}: SortableBoardItemProps) {
     const { dispatch } = useBoards();
     const { title, id, tasks } = board;
     const [isEditing, setIsEditing] = useState(false);
@@ -19,7 +23,10 @@ export default function SortableBoardItem({ board }: SortableBoardItemProps) {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (!editTitle.trim()) return;
-        dispatch({ type: "EDIT_BOARD_TITLE", payload: { id: board.id, newTitle: editTitle } });
+        dispatch({
+            type: "EDIT_BOARD_TITLE",
+            payload: { id: board.id, newTitle: editTitle }
+        });
         setIsEditing(false);
     };
 
@@ -28,7 +35,7 @@ export default function SortableBoardItem({ board }: SortableBoardItemProps) {
         setIsEditing(false);
     };
 
-    const handleDelete = (e: React.MouseEvent) => {
+    const handleDelete = (e: MouseEvent) => {
         e.stopPropagation();
         if (window.confirm("정말로 이 보드를 삭제하시겠습니까?")) {
             dispatch({ type: "DELETE_BOARD", payload: { id: board.id } });
@@ -40,7 +47,12 @@ export default function SortableBoardItem({ board }: SortableBoardItemProps) {
     };
 
     return (
-        <div ref={draggedItemRef} className="p-4 bg-white rounded-lg shadow-md">
+        <div
+            ref={draggedItemRef}
+            className="p-4 bg-white rounded-lg shadow-md"
+            tabIndex={0}
+            onKeyDown={(e) => onKeyDown(e, board)}
+        >
             <BoardHeader
                 title={title}
                 taskCount={tasks.length}

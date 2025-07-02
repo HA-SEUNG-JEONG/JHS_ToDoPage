@@ -11,9 +11,46 @@ export default function BoardList({ boards }: Props) {
     const { dispatch } = useBoards();
     const [draggedBoard, setDraggedBoard] = useState<Board | null>(null);
     const [isDragging, setIsDragging] = useState(false);
+    const [keyboardDraggedBoardId, setKeyboardDraggedBoardId] = useState<
+        string | null
+    >(null);
 
     const draggedBoardRef = useRef<HTMLDivElement | null>(null);
     const touchTimeout = useRef<NodeJS.Timeout | null>(null);
+
+    const handleKeyDown = (
+        e: React.KeyboardEvent<HTMLDivElement>,
+        board: Board
+    ) => {
+        if (e.key === " " || e.key === "Enter") {
+            e.preventDefault();
+            if (keyboardDraggedBoardId === board.id) {
+                setKeyboardDraggedBoardId(null);
+            } else {
+                setKeyboardDraggedBoardId(board.id);
+            }
+        } else if (
+            keyboardDraggedBoardId === board.id &&
+            (e.key === "ArrowLeft" || e.key === "ArrowRight")
+        ) {
+            e.preventDefault();
+            const currentIndex = boards.findIndex((b) => b.id === board.id);
+            let newIndex = currentIndex;
+
+            if (e.key === "ArrowLeft") {
+                newIndex = Math.max(0, currentIndex - 1);
+            } else if (e.key === "ArrowRight") {
+                newIndex = Math.min(boards.length - 1, currentIndex + 1);
+            }
+
+            if (newIndex !== currentIndex) {
+                const newBoards = [...boards];
+                const [movedBoard] = newBoards.splice(currentIndex, 1);
+                newBoards.splice(newIndex, 0, movedBoard);
+                dispatch({ type: "REORDER_BOARDS", payload: newBoards });
+            }
+        }
+    };
 
     const handleDragStart = (
         e: React.DragEvent<HTMLDivElement>,
@@ -202,9 +239,17 @@ export default function BoardList({ boards }: Props) {
                     className={`
                         select-none
                         ${isDragging ? "opacity-50" : ""}
+                        ${
+                            keyboardDraggedBoardId === board.id
+                                ? "border-2 border-blue-500"
+                                : ""
+                        }
                     `}
                 >
-                    <SortableBoardItem board={board} />
+                    <SortableBoardItem
+                        board={board}
+                        onKeyDown={handleKeyDown}
+                    />
                 </div>
             ))}
         </div>
